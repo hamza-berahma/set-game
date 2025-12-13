@@ -1,8 +1,16 @@
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: { globals: globals.browser } },
-  tseslint.configs.recommended,
+    globalIgnores(["dist"]),
+
+    {
+        files: ["**/*.{ts,mts,cts}"],
+        languageOptions: {
+            ecmaVersion: 2020,
+            globals: globals.node,
+        },
+        extends: [tseslint.configs.recommended],
+    },
 ]);
