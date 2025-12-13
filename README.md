@@ -1,3 +1,3 @@
 # SET GAME
 
-A mutiplayer player game implemts set. 
+A multiplayer player game implements set. 
