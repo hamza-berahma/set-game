@@ -55,6 +55,21 @@
       * `triggering_move_id`: **Nullable**. The move that caused this state. NULL for the "Genesis" state (State 0).
       * `sequence_number`: Integer (0, 1, 2...) ordering the states within a match.
 
+## 4. Indexes & Performance
+
+While Primary Keys (PK) and Unique Keys (UK) are automatically indexed, the following explicit indexes are required for query performance:
+
+### Critical Lookups
+* **`RoomParticipants(user_id)`**:
+    * *Why:* The composite PK `(room_id, user_id)` optimizes looking up players in a room. We need this separate index to quickly check *"Is User X currently in any room?"* without scanning the whole table.
+* **`Matches(room_id)`**:
+    * *Why:* Fast retrieval of a room's entire match history.
+
+### Replay Engine Optimization
+* **`Moves(match_id, offset_ms ASC)`**:
+    * *Why:* The Replay Engine fetches moves sequentially. This composite index prevents sorting overhead during playback.
+* **`GameStates(match_id, sequence_number)`**:
+    * *Why:* Ensures instant loading of game snapshots in the correct order.
 
 ## ER Diagram
 
