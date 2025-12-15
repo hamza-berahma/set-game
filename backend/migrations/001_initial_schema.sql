@@ -71,4 +71,32 @@ CREATE TABLE moves (
     server_received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Users
+CREATE UNIQUE INDEX idx_users_username ON users(username);
+CREATE UNIQUE INDEX idx_users_email ON users(email);
+
+-- GameRooms
+CREATE UNIQUE INDEX idx_game_rooms_room_code ON game_rooms(room_code);
+CREATE INDEX idx_game_rooms_current_match ON game_rooms(current_match_id);
+
+-- RoomParticipants
+CREATE INDEX idx_room_participants_user_id ON room_participants(user_id);
+CREATE INDEX idx_room_participants_room_id ON room_participants(room_id);
+
+-- Matches
+CREATE INDEX idx_matches_room_id ON matches(room_id);
+
+-- MatchResults
+CREATE INDEX idx_match_results_user_id ON match_results(user_id);
+CREATE INDEX idx_match_results_match_id ON match_results(match_id);
+
+-- Moves
+CREATE INDEX idx_moves_match_id ON moves(match_id);
+CREATE INDEX idx_moves_user_id ON moves(user_id);
+CREATE INDEX idx_moves_previous_state_id ON moves(previous_state_id);
+
+-- GameStates
+CREATE INDEX idx_game_states_match_id ON game_states(match_id);
+CREATE INDEX idx_game_states_triggering_move_id ON game_states(triggering_move_id);
+
 COMMIT;
