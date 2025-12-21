@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 require("dotenv/config");
 const cors_1 = __importDefault(require("cors"));
+const database_1 = __importDefault(require("./config/database"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 app.use((0, cors_1.default)());
@@ -18,6 +19,16 @@ app.get("/health", (req, res) => {
     res.json({
         status: "ok",
     });
+});
+app.get("/users", async (req, res) => {
+    try {
+        const result = await database_1.default.query("SELECT * from users");
+        res.json(result.rows);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Database had and error");
+    }
 });
 app.use((err, req, res, next) => {
     console.error("Error : ", err);
