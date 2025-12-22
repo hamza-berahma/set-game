@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
-const UserRepositories_1 = require("../repositories/UserRepositories");
+const UserRepository_1 = require("../repositories/UserRepository");
 async function testRepository() {
-    const userRepo = new UserRepositories_1.UserRepository();
+    const userRepo = new UserRepository_1.UserRepository();
     try {
         console.log("Testing create...");
         const newUser = await userRepo.create({
