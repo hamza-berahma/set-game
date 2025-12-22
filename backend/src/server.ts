@@ -1,12 +1,16 @@
 import express, { NextFunction, Request, Response } from "express";
 import "dotenv/config";
 import cors from "cors";
+import { createServer } from "http";
 import pool from "./config/database";
 import authRoutes from "./routes/auth";
 import { authenticate } from "./middleware/auth";
+import { initializeSocket } from "./socket/socket";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const httpServer = createServer(app);
+const io = initializeSocket(httpServer);
 
 app.use(cors());
 app.use(express.json());
@@ -14,6 +18,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
     next();
 });
+
 app.use("/api/auth", authRoutes);
 
 app.get("/api/profile", authenticate, (req: Request, res: Response) => {
@@ -47,6 +52,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`listening at port ${PORT}`);
+httpServer.listen(PORT, () => {
+    console.log(`Server listening at port ${PORT}`);
+    console.log(`Socket.IO server initialized`);
 });
