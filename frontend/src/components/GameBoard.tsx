@@ -89,7 +89,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                 {/* Error message display */}
                 {validationError && (
                     <div
-                        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                        className="bg-set-red border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-brutal"
                         role="alert"
                     >
                         <span className="block sm:inline">{validationError}</span>
@@ -98,14 +98,14 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
 
                 {/* Loading/Processing indicator */}
                 {showProcessing && !validationError && (
-                    <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+                    <div className="bg-set-purple border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-brutal">
                         Validating selection...
                     </div>
                 )}
 
                 {/* Game Board */}
                 <div
-                    className={`grid grid-cols-4 gap-4 p-4 bg-gray-100 rounded-lg ${showProcessing ? "opacity-50 pointer-events-none" : ""}`}
+                    className={`grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 p-4 ${showProcessing ? "opacity-50 pointer-events-none" : ""}`}
                 >
                     {cards.map((card, index) => (
                         <Card
@@ -116,6 +116,15 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                         />
                     ))}
                 </div>
+
+                {/* Selected Cards Counter */}
+                {selectedCards.length > 0 && (
+                    <div className="text-center">
+                        <div className="inline-flex items-center gap-2 bg-white border-4 border-black px-6 py-3 shadow-brutal uppercase tracking-wider">
+                            <span>{selectedCards.length}/3 Selected</span>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

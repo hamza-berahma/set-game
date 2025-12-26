@@ -8,8 +8,8 @@ export const StripePatterns = () => (
                 width="12"
                 height="8"
                 patternUnits="userSpaceOnUse"
-                stroke="#EF4444"
-                strokeWidth="0.3"
+                stroke="#CC0000"
+                strokeWidth="2"
             >
                 <line x1="1" y1="0" x2="1" y2="8" />
                 <line x1="2.2" y1="0" x2="2.2" y2="8" />
@@ -29,8 +29,8 @@ export const StripePatterns = () => (
                 width="12"
                 height="8"
                 patternUnits="userSpaceOnUse"
-                stroke="#10B981"
-                strokeWidth="0.3"
+                stroke="#00AA00"
+                strokeWidth="2"
             >
                 <line x1="1" y1="0" x2="1" y2="8" />
                 <line x1="2.2" y1="0" x2="2.2" y2="8" />
@@ -50,8 +50,8 @@ export const StripePatterns = () => (
                 width="12"
                 height="8"
                 patternUnits="userSpaceOnUse"
-                stroke="#8B5CF6"
-                strokeWidth="0.3"
+                stroke="#6600CC"
+                strokeWidth="2"
             >
                 <line x1="1" y1="0" x2="1" y2="8" />
                 <line x1="2.2" y1="0" x2="2.2" y2="8" />

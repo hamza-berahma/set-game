@@ -26,19 +26,19 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-                <h2 className="text-3xl font-bold text-center">Register</h2>
+        <div className="min-h-screen flex items-center justify-center bg-beige p-4">
+            <div className="max-w-md w-full space-y-8 p-8 bg-white border-4 border-black shadow-brutal">
+                <h2 className="text-3xl font-bold text-center uppercase tracking-wider">Register</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        <div className="bg-red-100 border-4 border-black text-red-700 px-4 py-3 uppercase tracking-wider">
                             {error}
                         </div>
                     )}
                     <div>
                         <label
                             htmlFor="username"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium uppercase tracking-wider mb-1"
                         >
                             Username
                         </label>
@@ -51,11 +51,11 @@ export default function RegisterPage() {
                             minLength={3}
                             maxLength={20}
                             pattern="[a-zA-Z0-9_]+"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full px-4 py-3 border-4 border-black bg-white focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
                         />
                     </div>
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="email" className="block text-sm font-medium uppercase tracking-wider mb-1">
                             Email
                         </label>
                         <input
@@ -64,13 +64,13 @@ export default function RegisterPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full px-4 py-3 border-4 border-black bg-white focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
                         />
                     </div>
                     <div>
                         <label
                             htmlFor="password"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium uppercase tracking-wider mb-1"
                         >
                             Password
                         </label>
@@ -81,20 +81,20 @@ export default function RegisterPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             minLength={6}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full px-4 py-3 border-4 border-black bg-white focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
                         />
                     </div>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                        className="w-full py-4 px-4 border-4 border-black text-white bg-set-purple hover:bg-purple-700 shadow-brutal uppercase tracking-wider font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
                     >
                         {loading ? "Registering..." : "Register"}
                     </button>
                 </form>
-                <p className="text-center text-sm text-gray-600">
+                <p className="text-center text-sm uppercase tracking-wider">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 hover:text-blue-500">
+                    <Link to="/login" className="text-set-green hover:underline font-semibold">
                         Login
                     </Link>
                 </p>
