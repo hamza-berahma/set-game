@@ -18,4 +18,13 @@ export interface GameState {
     board: Card[];
     scores: Record<string, number>;
     players: string[];
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export interface RoomSettings {
+    maxPlayers: number;
+    timerDuration: number; // in seconds, 0 means no timer
+    isPrivate: boolean;
+    roomName?: string;
 }

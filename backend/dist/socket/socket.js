@@ -4,7 +4,9 @@ exports.initializeSocket = initializeSocket;
 const socket_io_1 = require("socket.io");
 const jwt_1 = require("../utils/jwt");
 const GameService_1 = require("../services/GameService");
+const EventLogService_1 = require("../services/EventLogService");
 const gameService = new GameService_1.GameService();
+const eventLogService = new EventLogService_1.EventLogService();
 function initializeSocket(server) {
     const io = new socket_io_1.Server(server, {
         cors: {
@@ -44,6 +46,8 @@ function initializeSocket(server) {
                 let gameState = await gameService.getGame(roomId);
                 if (!gameState) {
                     gameState = await gameService.createGame(roomId, [user.userId]);
+                    // Log game started
+                    await eventLogService.logGameStarted(roomId, roomId); // Using roomId as matchId for now
                 }
                 else if (!gameState.players.includes(user.userId)) {
                     gameState.players.push(user.userId);
@@ -51,6 +55,8 @@ function initializeSocket(server) {
                     // Update game state in cache
                     await gameService.updateGameState(roomId, gameState);
                 }
+                // Log player joined
+                await eventLogService.logPlayerJoined(roomId, user.userId, roomId);
                 socket.to(roomId).emit("player:joined", {
                     roomId,
                     playerId: user.userId,
@@ -86,6 +92,8 @@ function initializeSocket(server) {
                         players: gameState.players.filter((id) => id !== user.userId),
                     });
                 }
+                // Log player left
+                await eventLogService.logPlayerLeft(user.roomId, user.userId, user.roomId);
                 console.log(`User ${user.username} left room ${user.roomId}`);
                 user.roomId = undefined;
             }
@@ -108,6 +116,13 @@ function initializeSocket(server) {
                     });
                     return;
                 }
+                // Log SET found
+                await eventLogService.logSetFound(user.roomId, user.roomId, // matchId
+                user.userId, cardIds, result.score || 0);
+                // Log move
+                await eventLogService.logMove(user.roomId, user.roomId, // matchId
+                user.userId, cardIds, Date.now() // offsetMs - simplified for now
+                );
                 io.to(user.roomId).emit("set:found", {
                     roomId: user.roomId,
                     playerId: user.userId,
@@ -126,6 +141,8 @@ function initializeSocket(server) {
                         players: gameState.players,
                     });
                     if (gameState.status === "finished") {
+                        // Log game ended
+                        await eventLogService.logGameEnded(user.roomId, user.roomId, gameState.scores);
                         io.to(user.roomId).emit("game:ended", {
                             roomId: user.roomId,
                             scores: gameState.scores,

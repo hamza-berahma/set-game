@@ -2,26 +2,40 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Plus, Users } from 'lucide-react';
+import RoomSettingsModal from '../components/RoomSettingsModal';
+import type { RoomSettings } from '../components/RoomSettingsModal';
+import Modal from '../components/Modal';
+import { useModal } from '../hooks/useModal';
 
 export default function LobbyPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState('');
+  const settingsModal = useModal();
+  const errorModal = useModal();
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleCreateRoom = () => {
+  const handleCreateRoom = (settings: RoomSettings) => {
+    // TODO: Send settings to backend API to create room
+    // For now, generate room ID and navigate with settings in URL params or state
     const newRoomId = `room-${Math.random().toString(36).substring(2, 9)}`;
-    navigate(`/game/${newRoomId}`);
+    navigate(`/game/${newRoomId}`, {
+      state: { settings }
+    });
   };
 
   const handleJoinRoom = (e: React.FormEvent) => {
     e.preventDefault();
     if (roomId.trim()) {
       navigate(`/game/${roomId.trim()}`);
+    } else {
+      setErrorMessage('Please enter a room ID');
+      errorModal.open();
     }
   };
 
@@ -52,7 +66,7 @@ export default function LobbyPage() {
                 Start a new game room and share the room ID with friends.
               </p>
               <button
-                onClick={handleCreateRoom}
+                onClick={settingsModal.open}
                 className="w-full px-6 py-4 bg-set-green hover:bg-[#008800] text-white border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-lg"
                 style={{ color: '#ffffff', backgroundColor: '#00AA00' }}
               >
@@ -92,6 +106,30 @@ export default function LobbyPage() {
           </div>
         </div>
       </div>
+
+      {/* Room Settings Modal */}
+      <RoomSettingsModal
+        isOpen={settingsModal.isOpen}
+        onClose={settingsModal.close}
+        onSave={handleCreateRoom}
+      />
+
+      {/* Error Modal */}
+      <Modal
+        isOpen={errorModal.isOpen}
+        onClose={errorModal.close}
+        title="Error"
+        type="error"
+      >
+        <p className="uppercase tracking-wider text-black">{errorMessage}</p>
+        <button
+          onClick={errorModal.close}
+          className="mt-4 w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+          style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+        >
+          Close
+        </button>
+      </Modal>
     </div>
   );
 }

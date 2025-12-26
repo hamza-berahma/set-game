@@ -1,22 +1,31 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import GameBoard from '../components/GameBoard';
 import { useSocket } from '../hooks/useSocket';
 import { socketService } from '../services/socketService';
 import { useAuthStore } from '../stores/authStore';
-import type { GameState } from '../types/game';
+import type { GameState, RoomSettings } from '../types/game';
+import Modal from '../components/Modal';
+import { useModal } from '../hooks/useModal';
 
 export default function GameRoomPage() {
     const { roomId } = useParams<{ roomId: string }>();
+    const location = useLocation();
     const { socket, isConnected, error: socketError } = useSocket();
     const { user } = useAuthStore();
     
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const notificationModal = useModal();
     const [notification, setNotification] = useState<{
         message: string;
         type: 'success' | 'error' | 'info';
     } | null>(null);
+    
+    // Timer state
+    const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+    const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const roomSettings = (location.state as { settings?: RoomSettings })?.settings;
 
     // Initialize socket service
     useEffect(() => {
@@ -40,6 +49,37 @@ export default function GameRoomPage() {
         };
     }, [socket, isConnected, roomId]);
 
+    // Timer management
+    useEffect(() => {
+        if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && gameState?.status === 'active') {
+            setTimeRemaining(roomSettings.timerDuration);
+            
+            timerIntervalRef.current = setInterval(() => {
+                setTimeRemaining((prev) => {
+                    if (prev === null || prev <= 1) {
+                        if (timerIntervalRef.current) {
+                            clearInterval(timerIntervalRef.current);
+                        }
+                        // Timer ended - could emit event to backend
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            
+            return () => {
+                if (timerIntervalRef.current) {
+                    clearInterval(timerIntervalRef.current);
+                }
+            };
+        } else {
+            if (timerIntervalRef.current) {
+                clearInterval(timerIntervalRef.current);
+            }
+            setTimeRemaining(null);
+        }
+    }, [roomSettings?.timerDuration, gameState?.status]);
+
     // Set up event handlers
     useEffect(() => {
         socketService.setHandlers({
@@ -59,27 +99,28 @@ export default function GameRoomPage() {
                         type: 'info',
                     });
                 }
-                setTimeout(() => setNotification(null), 3000);
+                notificationModal.open();
             },
             onPlayerJoined: (data) => {
                 setNotification({
                     message: `${data.username} joined the game`,
                     type: 'info',
                 });
-                setTimeout(() => setNotification(null), 2000);
+                notificationModal.open();
             },
             onPlayerLeft: (data) => {
                 setNotification({
                     message: `${data.username} left the game`,
                     type: 'info',
                 });
-                setTimeout(() => setNotification(null), 2000);
+                notificationModal.open();
             },
             onGameEnded: () => {
                 setNotification({
                     message: 'Game ended!',
                     type: 'info',
                 });
+                notificationModal.open();
             },
             onError: (error) => {
                 setNotification({
@@ -87,10 +128,10 @@ export default function GameRoomPage() {
                     type: 'error',
                 });
                 setIsProcessing(false);
-                setTimeout(() => setNotification(null), 3000);
+                notificationModal.open();
             },
         });
-    }, [user]);
+    }, [user, notificationModal]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {
@@ -98,11 +139,18 @@ export default function GameRoomPage() {
                 message: 'Not connected to server',
                 type: 'error',
             });
+            notificationModal.open();
             return;
         }
 
         setIsProcessing(true);
         socketService.selectCards(roomId, cardIds);
+    };
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${String(secs).padStart(2, '0')}`;
     };
 
     // Display connection status
@@ -137,32 +185,28 @@ export default function GameRoomPage() {
                             </div>
                         </div>
                         {gameState && (
-                            <div className="flex items-center gap-4 text-sm uppercase tracking-wider text-black">
+                            <div className="flex items-center gap-4 text-sm uppercase tracking-wider text-black flex-wrap">
                                 <div>
                                     Status: <span className="font-semibold">{gameState.status}</span>
                                 </div>
                                 <div>
                                     Players: <span className="font-semibold">{gameState.players.length}</span>
+                                    {roomSettings?.maxPlayers && (
+                                        <span className="text-black"> / {roomSettings.maxPlayers}</span>
+                                    )}
                                 </div>
+                                {timeRemaining !== null && (
+                                    <div className={`font-bold ${
+                                        timeRemaining < 30 ? 'text-set-red' : 
+                                        timeRemaining < 60 ? 'text-gold' : 'text-black'
+                                    }`}>
+                                        Time: {formatTime(timeRemaining)}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
-
-                {/* Notification Banner */}
-                {notification && (
-                    <div
-                        className={`mb-4 p-4 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
-                            notification.type === 'success'
-                                ? 'bg-set-green text-white'
-                                : notification.type === 'error'
-                                  ? 'bg-set-red text-white'
-                                  : 'bg-set-purple text-white'
-                        }`}
-                    >
-                        {notification.message}
-                    </div>
-                )}
 
                 {/* Main Game Layout */}
                 <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -228,6 +272,37 @@ export default function GameRoomPage() {
                                 ))}
                         </div>
                     </div>
+                )}
+
+                {/* Notification Modal */}
+                {notification && (
+                    <Modal
+                        isOpen={notificationModal.isOpen}
+                        onClose={notificationModal.close}
+                        title={
+                            notification.type === 'success' ? 'Success' :
+                            notification.type === 'error' ? 'Error' :
+                            'Notification'
+                        }
+                        type={notification.type}
+                    >
+                        <p className="uppercase tracking-wider text-black mb-4">{notification.message}</p>
+                        <button
+                            onClick={notificationModal.close}
+                            className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
+                                notification.type === 'success' ? 'bg-set-green hover:bg-[#008800]' :
+                                notification.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
+                                'bg-set-purple hover:bg-[#5500AA]'
+                            }`}
+                            style={{
+                                color: '#ffffff',
+                                backgroundColor: notification.type === 'success' ? '#00AA00' :
+                                    notification.type === 'error' ? '#CC0000' : '#6600CC'
+                            }}
+                        >
+                            Close
+                        </button>
+                    </Modal>
                 )}
             </div>
         </div>

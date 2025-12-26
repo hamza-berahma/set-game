@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Card from "./Card";
 import type { Card as CardType } from "../types/game";
 import { isValidSet } from "../utils/game";
+import Modal from "./Modal";
+import { useModal } from "../hooks/useModal";
 
 interface GameBoardProps {
     cards: CardType[];
@@ -13,6 +15,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
     const [selectedCards, setSelectedCards] = useState<number[]>([]);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [isValidating, setIsValidating] = useState(false);
+    const errorModal = useModal();
 
     const handleCardClick = (index: number) => {
         if (isProcessing || isValidating) return;
@@ -58,9 +61,9 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
             } else {
                 // Invalid SET - show error
                 setIsValidating(true);
-                setValidationError(
-                    "Selected cards do not form a valid SET. Each attribute must be all the same or all different.",
-                );
+                const errorMsg = "Selected cards do not form a valid SET. Each attribute must be all the same or all different.";
+                setValidationError(errorMsg);
+                errorModal.open();
 
                 // Clear selection after showing error
                 setTimeout(() => {
@@ -83,16 +86,6 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
 
     return (
         <div className="space-y-4">
-                {/* Error message display */}
-                {validationError && (
-                    <div
-                        className="bg-set-red border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                        role="alert"
-                    >
-                        <span className="block sm:inline">{validationError}</span>
-                    </div>
-                )}
-
                 {/* Loading/Processing indicator */}
                 {showProcessing && !validationError && (
                     <div className="bg-set-purple border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -125,6 +118,25 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                         </div>
                     )}
                 </div>
+
+                {/* Error Modal */}
+                {validationError && (
+                    <Modal
+                        isOpen={errorModal.isOpen}
+                        onClose={errorModal.close}
+                        title="Invalid SET"
+                        type="error"
+                    >
+                        <p className="uppercase tracking-wider text-black mb-4">{validationError}</p>
+                        <button
+                            onClick={errorModal.close}
+                            className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+                            style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+                        >
+                            Close
+                        </button>
+                    </Modal>
+                )}
         </div>
     );
 }

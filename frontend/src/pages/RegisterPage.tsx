@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
+import Modal from "../components/Modal";
+import { useModal } from "../hooks/useModal";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState("");
@@ -10,6 +12,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const register = useAuthStore((state) => state.register);
     const navigate = useNavigate();
+    const errorModal = useModal();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,7 +22,9 @@ export default function RegisterPage() {
             await register(username, email, password);
             navigate("/lobby");
         } catch (err: any) {
-            setError(err.response?.data?.message || "Registration Failed");
+            const errorMsg = err.response?.data?.message || "Registration Failed";
+            setError(errorMsg);
+            errorModal.open();
         } finally {
             setLoading(false);
         }
@@ -30,11 +35,6 @@ export default function RegisterPage() {
             <div className="max-w-md w-full space-y-8 p-8 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <h2 className="text-3xl font-bold text-center uppercase tracking-wider text-black">Register</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && (
-                        <div className="bg-set-red border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            {error}
-                        </div>
-                    )}
                     <div>
                         <label
                             htmlFor="username"
@@ -100,6 +100,25 @@ export default function RegisterPage() {
                     </Link>
                 </p>
             </div>
+
+            {/* Error Modal */}
+            {error && (
+                <Modal
+                    isOpen={errorModal.isOpen}
+                    onClose={errorModal.close}
+                    title="Registration Error"
+                    type="error"
+                >
+                    <p className="uppercase tracking-wider text-black mb-4">{error}</p>
+                    <button
+                        onClick={errorModal.close}
+                        className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+                        style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+                    >
+                        Close
+                    </button>
+                </Modal>
+            )}
         </div>
     );
 }
