@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import { createServer } from "http";
 import pool from "./config/database";
+import { initializeRedis } from "./config/redis";
 import authRoutes from "./routes/auth";
 import { authenticate } from "./middleware/auth";
 import { initializeSocket } from "./socket/socket";
@@ -51,6 +52,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         message: err.message,
     });
 });
+
+// Initialize Redis
+initializeRedis();
 
 httpServer.listen(PORT, () => {
     console.log(`Server listening at port ${PORT}`);

@@ -37,11 +37,13 @@
         "typescript-eslint": "^8.49.0"
     },
     "dependencies": {
+        "@types/ioredis": "^4.28.10",
         "audit": "^0.0.6",
         "bcrypt": "^6.0.0",
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
         "express": "^5.2.1",
+        "ioredis": "^5.8.2",
         "jsonwebtoken": "^9.0.3",
         "pg": "^8.16.3",
         "socket.io": "^4.8.2",

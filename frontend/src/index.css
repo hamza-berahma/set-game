@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
 * {
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -19,4 +19,76 @@ h1, h2, h3 {
 
 h1 {
   letter-spacing: 0.1em;
+}
+
+/* Card styling - matches specs */
+.card {
+  position: relative;
+  width: 64px;
+  height: 88px;
+  transition: top 0.5s ease-in-out, left 0.5s ease-in-out, transform 0.2s ease;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  background-color: #ffffff;
+  border: 4px solid #000000;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.1s ease, border-width 0.1s ease;
+  backface-visibility: hidden;
+}
+
+.card:hover .card-inner {
+  transform: scale(1.05);
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
+}
+
+.card-inner.selected {
+  transform: scale(1.1) !important;
+  border-width: 6px;
+  box-shadow: 6px 6px 0px 0px rgba(0,0,0,1) !important;
+}
+
+.card-inner svg {
+  width: 60px;
+  height: auto;
+  flex-shrink: 0;
+  fill: transparent;
+  stroke-width: 0.5;
+}
+
+/* Responsive card sizes and gaps - always 3 rows × 4 columns */
+.card {
+  width: 128px;
+  height: 176px;
+}
+
+.card-grid {
+  gap: 40px;
+}
+
+@media (max-width: 1200px) {
+  .card {
+    width: 96px;
+    height: 132px;
+  }
+  .card-grid {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 950px) {
+  .card {
+    width: 64px;
+    height: 88px;
+  }
+  .card-grid {
+    gap: 12px;
+  }
 }

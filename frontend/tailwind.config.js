@@ -13,6 +13,9 @@ export default {
         'set-purple': '#6600CC',
         gold: '#FFD700',
       },
+      borderRadius: {
+        'none': '0',
+      },
       boxShadow: {
         'brutal': '4px 4px 0px 0px rgba(0,0,0,1)',
         'brutal-lg': '6px 6px 0px 0px rgba(0,0,0,1)',

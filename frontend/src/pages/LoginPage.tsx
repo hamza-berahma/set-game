@@ -26,18 +26,18 @@ export default function LoginPage() {
     };
     return (
         <div className="min-h-screen flex items-center justify-center bg-beige p-4">
-            <div className="max-w-md w-full space-y-8 p-8 bg-white border-4 border-black shadow-brutal">
-                <h2 className="text-3xl font-bold text-center uppercase tracking-wider">Login</h2>
+            <div className="max-w-md w-full space-y-8 p-8 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <h2 className="text-3xl font-bold text-center uppercase tracking-wider text-black">Login</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="bg-red-100 border-4 border-black text-red-700 px-4 py-3 uppercase tracking-wider">
+                        <div className="bg-set-red border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                             {error}
                         </div>
                     )}
                     <div>
                         <label
                             htmlFor="username"
-                            className="block text-sm font-medium uppercase tracking-wider mb-1"
+                            className="block text-sm font-medium uppercase tracking-wider mb-1 text-black"
                         >
                             Username
                         </label>
@@ -47,13 +47,13 @@ export default function LoginPage() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
-                            className="block w-full px-4 py-3 border-4 border-black bg-white focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
+                            className="block w-full px-4 py-3 border-4 border-black bg-white text-black focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
                         />
                     </div>
                     <div>
                         <label
                             htmlFor="password"
-                            className="block text-sm font-medium uppercase tracking-wider mb-1"
+                            className="block text-sm font-medium uppercase tracking-wider mb-1 text-black"
                         >
                             Password
                         </label>
@@ -63,18 +63,19 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="block w-full px-4 py-3 border-4 border-black bg-white focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
+                            className="block w-full px-4 py-3 border-4 border-black bg-white text-black focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
                         />
                     </div>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-4 px-4 border-4 border-black text-white bg-set-green hover:bg-green-600 shadow-brutal uppercase tracking-wider font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                        className="w-full py-4 px-4 border-4 border-black text-white bg-set-green hover:bg-[#008800] uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                        style={{ color: '#ffffff', backgroundColor: '#00AA00' }}
                     >
                         {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
-                <p className="text-center text-sm uppercase tracking-wider">
+                <p className="text-center text-sm uppercase tracking-wider text-black">
                     Don't have an account?{" "}
                     <Link to="/register" className="text-set-purple hover:underline font-semibold">
                         Register

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import Card from "./Card";
-import { StripePatterns } from "./StripePatterns";
 import type { Card as CardType } from "../types/game";
 import { isValidSet } from "../utils/game";
 
@@ -83,13 +82,11 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
     const showProcessing = isProcessing || isValidating;
 
     return (
-        <>
-            <StripePatterns />
-            <div className="space-y-4">
+        <div className="space-y-4">
                 {/* Error message display */}
                 {validationError && (
                     <div
-                        className="bg-set-red border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-brutal"
+                        className="bg-set-red border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                         role="alert"
                     >
                         <span className="block sm:inline">{validationError}</span>
@@ -98,34 +95,36 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
 
                 {/* Loading/Processing indicator */}
                 {showProcessing && !validationError && (
-                    <div className="bg-set-purple border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-brutal">
+                    <div className="bg-set-purple border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         Validating selection...
                     </div>
                 )}
 
-                {/* Game Board */}
-                <div
-                    className={`grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 p-4 ${showProcessing ? "opacity-50 pointer-events-none" : ""}`}
-                >
-                    {cards.map((card, index) => (
-                        <Card
-                            key={card.id}
-                            card={card}
-                            isSelected={selectedCards.includes(index)}
-                            onClick={() => handleCardClick(index)}
-                        />
-                    ))}
-                </div>
-
-                {/* Selected Cards Counter */}
-                {selectedCards.length > 0 && (
-                    <div className="text-center">
-                        <div className="inline-flex items-center gap-2 bg-white border-4 border-black px-6 py-3 shadow-brutal uppercase tracking-wider">
-                            <span>{selectedCards.length}/3 Selected</span>
-                        </div>
+                {/* Game Board Container */}
+                <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 md:p-6">
+                    {/* Card Grid - Fixed 3 rows × 4 columns */}
+                    <div
+                        className={`card-grid grid grid-cols-4 justify-items-center ${showProcessing ? "opacity-50 pointer-events-none" : ""}`}
+                    >
+                        {cards.map((card, index) => (
+                            <Card
+                                key={card.id}
+                                card={card}
+                                isSelected={selectedCards.includes(index)}
+                                onClick={() => handleCardClick(index)}
+                            />
+                        ))}
                     </div>
-                )}
-            </div>
-        </>
+
+                    {/* Selected Cards Counter */}
+                    {selectedCards.length > 0 && (
+                        <div className="mt-6 text-center">
+                            <div className="inline-flex items-center gap-2 bg-white border-4 border-black px-6 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wider text-black">
+                                <span>{selectedCards.length}/3 Selected</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+        </div>
     );
 }
