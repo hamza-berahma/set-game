@@ -1,7 +1,7 @@
-import type { Card } from "../types/game";
+import type { Card, Number, Shape, Shading, Color } from "../types/game";
 
 export function isValidSet(card1: Card, card2: Card, card3: Card): boolean {
-    const checkAttribute = (attr1: any, attr2: any, attr3: any) => {
+    const checkAttribute = <T extends Number | Shape | Shading | Color>(attr1: T, attr2: T, attr3: T): boolean => {
         const allSame = attr1 === attr2 && attr2 === attr3;
         const allDifferent = attr1 !== attr2 && attr2 !== attr3 && attr1 !== attr3;
         return allSame || allDifferent;

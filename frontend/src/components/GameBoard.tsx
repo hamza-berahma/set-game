@@ -81,8 +81,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                 errorModal.close();
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedCardIds]);
+    }, [selectedCardIds, cards, isValidating, onCardSelect, errorModal]);
 
     useEffect(() => {
         const cardIdsOnBoard = new Set(cards.map((c) => c.id));
@@ -94,8 +93,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
             setIsValidating(false);
             errorModal.close();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [cards]);
+    }, [cards, selectedCardIds, errorModal]);
 
     const showProcessing = isProcessing || isValidating;
 

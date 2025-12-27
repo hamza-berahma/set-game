@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
 import Modal from "../components/Modal";
 import { useModal } from "../hooks/useModal";
@@ -21,8 +22,12 @@ export default function RegisterPage() {
         try {
             await register(username, email, password);
             navigate("/lobby");
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || "Registration Failed";
+        } catch (err) {
+            const errorMsg = axios.isAxiosError(err)
+                ? err.response?.data?.message || err.message || "Registration Failed"
+                : err instanceof Error
+                ? err.message
+                : "Registration Failed";
             setError(errorMsg);
             errorModal.open();
         } finally {
