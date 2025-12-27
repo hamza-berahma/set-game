@@ -9,6 +9,7 @@ import type { GameState, RoomSettings } from '../types/game';
 import Modal from '../components/Modal';
 import { useModalWithContent } from '../hooks/useModal';
 import ProfileAvatar from '../components/ProfileAvatar';
+import BotAvatar from '../components/BotAvatar';
 import EventChat, { type GameEvent } from '../components/EventChat';
 
 type Notification = {
@@ -310,29 +311,44 @@ export default function GameRoomPage() {
                             <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
                                 <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Players</h3>
                                 <div className="space-y-3">
-                                    {gameState.players.map((playerId) => (
-                                        <div
-                                            key={playerId}
-                                            className={`border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
-                                                playerId === user?.user_id
-                                                    ? 'bg-gold'
-                                                    : 'bg-white'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <ProfileAvatar 
-                                                    userId={playerId} 
-                                                    size="medium"
-                                                />
-                                                <span className="text-sm uppercase tracking-wider font-semibold text-black">
-                                                    {playerId === user?.user_id ? 'You' : `Player ${playerId.slice(0, 8)}`}
-                                                </span>
+                                    {gameState.players.map((playerId) => {
+                                        const isBot = playerId.startsWith('bot-');
+                                        const isCurrentUser = playerId === user?.user_id;
+                                        
+                                        return (
+                                            <div
+                                                key={playerId}
+                                                className={`border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
+                                                    isCurrentUser
+                                                        ? 'bg-gold'
+                                                        : isBot
+                                                        ? 'bg-beige'
+                                                        : 'bg-white'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    {isBot ? (
+                                                        <BotAvatar 
+                                                            botId={playerId}
+                                                            botName={playerId.split('-')[2] || 'Bot'}
+                                                            size="medium"
+                                                        />
+                                                    ) : (
+                                                        <ProfileAvatar 
+                                                            userId={playerId} 
+                                                            size="medium"
+                                                        />
+                                                    )}
+                                                    <span className="text-sm uppercase tracking-wider font-semibold text-black">
+                                                        {isCurrentUser ? 'You' : isBot ? `Bot ${playerId.split('-')[2]?.slice(0, 4) || ''}` : `Player ${playerId.slice(0, 8)}`}
+                                                    </span>
+                                                </div>
+                                                <div className="text-2xl font-bold text-black">
+                                                    {gameState.scores[playerId] || 0} pts
+                                                </div>
                                             </div>
-                                            <div className="text-2xl font-bold text-black">
-                                                {gameState.scores[playerId] || 0} pts
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -353,13 +369,21 @@ export default function GameRoomPage() {
                                         className="flex items-center justify-between bg-beige border-4 border-black p-4 uppercase tracking-wider text-black"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <ProfileAvatar 
-                                                userId={playerId} 
-                                                size="medium"
-                                            />
+                                            {playerId.startsWith('bot-') ? (
+                                                <BotAvatar 
+                                                    botId={playerId}
+                                                    botName={playerId.split('-')[2] || 'Bot'}
+                                                    size="medium"
+                                                />
+                                            ) : (
+                                                <ProfileAvatar 
+                                                    userId={playerId} 
+                                                    size="medium"
+                                                />
+                                            )}
                                             <span>
                                                 {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
-                                                {playerId === user?.user_id ? 'You' : `Player ${playerId.slice(0, 8)}`}
+                                                {playerId === user?.user_id ? 'You' : playerId.startsWith('bot-') ? `Bot ${playerId.split('-')[2]?.slice(0, 4) || ''}` : `Player ${playerId.slice(0, 8)}`}
                                             </span>
                                         </div>
                                         <span className="text-xl font-bold text-black">{score}</span>

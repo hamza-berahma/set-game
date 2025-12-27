@@ -5,8 +5,10 @@ const socket_io_1 = require("socket.io");
 const jwt_1 = require("../utils/jwt");
 const GameService_1 = require("../services/GameService");
 const EventLogService_1 = require("../services/EventLogService");
+const BotManager_1 = require("../services/BotManager");
 const gameService = new GameService_1.GameService();
 const eventLogService = new EventLogService_1.EventLogService();
+const botManager = new BotManager_1.BotManager(gameService, eventLogService);
 function initializeSocket(server) {
     const io = new socket_io_1.Server(server, {
         cors: {
@@ -15,6 +17,7 @@ function initializeSocket(server) {
             credentials: true,
         },
     });
+    botManager.setIO(io);
     io.use((socket, next) => {
         const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(" ")[1];
         if (!token) {
@@ -48,6 +51,12 @@ function initializeSocket(server) {
                     gameState = await gameService.createGame(roomId, [user.userId]);
                     // Log game started
                     await eventLogService.logGameStarted(roomId, roomId); // Using roomId as matchId for now
+                    // Add 1-2 bots to new games for better gameplay
+                    const numBots = Math.floor(Math.random() * 2) + 1; // 1 or 2 bots
+                    for (let i = 0; i < numBots; i++) {
+                        const difficulty = ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)];
+                        await botManager.addBotToRoom(roomId, difficulty);
+                    }
                 }
                 else if (!gameState.players.includes(user.userId)) {
                     gameState.players.push(user.userId);
@@ -159,7 +168,7 @@ function initializeSocket(server) {
                 });
             }
         });
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             if (user.roomId) {
                 socket.to(user.roomId).emit("player:left", {
                     roomId: user.roomId,

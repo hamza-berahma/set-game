@@ -3,10 +3,12 @@ import { Server as HTTPServer } from "http";
 import { verifyToken } from "../utils/jwt";
 import { GameService } from "../services/GameService";
 import { EventLogService } from "../services/EventLogService";
+import { BotManager } from "../services/BotManager";
 import { SocketUser, JoinRoomData, SelectCardsData, SocketError } from "../types/socket";
 
 const gameService = new GameService();
 const eventLogService = new EventLogService();
+const botManager = new BotManager(gameService, eventLogService);
 
 export function initializeSocket(server: HTTPServer): SocketIOServer {
     const io = new SocketIOServer(server, {
@@ -16,6 +18,8 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
             credentials: true,
         },
     });
+
+    botManager.setIO(io);
 
     io.use((socket, next) => {
         const token =
@@ -57,6 +61,13 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                     gameState = await gameService.createGame(roomId, [user.userId]);
                     // Log game started
                     await eventLogService.logGameStarted(roomId, roomId); // Using roomId as matchId for now
+                    
+                    // Add 1-2 bots to new games for better gameplay
+                    const numBots = Math.floor(Math.random() * 2) + 1; // 1 or 2 bots
+                    for (let i = 0; i < numBots; i++) {
+                        const difficulty = ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)] as 'easy' | 'medium' | 'hard';
+                        await botManager.addBotToRoom(roomId, difficulty);
+                    }
                 } else if (!gameState.players.includes(user.userId)) {
                     gameState.players.push(user.userId);
                     gameState.scores[user.userId] = 0;
@@ -193,7 +204,7 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
             }
         });
 
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             if (user.roomId) {
                 socket.to(user.roomId).emit("player:left", {
                     roomId: user.roomId,

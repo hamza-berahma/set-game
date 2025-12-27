@@ -146,26 +146,26 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
             title: 'How to Play',
             content: (
                 <div className="space-y-4">
-                    <div className="space-y-3 text-black">
+                    <div className="space-y-3">
                         <div className="flex items-start gap-3">
-                            <span className="font-bold text-2xl">1.</span>
-                            <p>12 cards are displayed on the board.</p>
+                            <span className="font-bold text-2xl text-black">1.</span>
+                            <p className="text-black">12 cards are displayed on the board.</p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <span className="font-bold text-2xl">2.</span>
-                            <p>Find 3 cards that form a SET by clicking on them.</p>
+                            <span className="font-bold text-2xl text-black">2.</span>
+                            <p className="text-black">Find 3 cards that form a SET by clicking on them.</p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <span className="font-bold text-2xl">3.</span>
-                            <p>If valid, you score points and new cards replace them.</p>
+                            <span className="font-bold text-2xl text-black">3.</span>
+                            <p className="text-black">If valid, you score points and new cards replace them.</p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <span className="font-bold text-2xl">4.</span>
-                            <p>If no SET exists, 3 more cards are added.</p>
+                            <span className="font-bold text-2xl text-black">4.</span>
+                            <p className="text-black">If no SET exists, 3 more cards are added.</p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <span className="font-bold text-2xl">5.</span>
-                            <p>The player with the most points wins!</p>
+                            <span className="font-bold text-2xl text-black">5.</span>
+                            <p className="text-black">The player with the most points wins!</p>
                         </div>
                     </div>
                     <div className="bg-gold border-4 border-black p-4 mt-4">
