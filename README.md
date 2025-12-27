@@ -23,7 +23,7 @@ sudo docker-compose -f infrastructure/docker-compose.yml up -d
 ```
 
 Access the application:
-- **Frontend**: http://localhost:80
+- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
 
 See [Infrastructure README](infrastructure/README.md) for detailed Docker instructions.

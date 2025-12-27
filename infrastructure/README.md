@@ -7,12 +7,12 @@ This directory contains Docker Compose configuration for the complete SET game a
 - **PostgreSQL**: Database server (port 5432)
 - **Redis**: Cache server (port 6379)
 - **Backend**: Node.js/Express API server (port 5000)
-- **Frontend**: React application served via Nginx (port 80)
+- **Frontend**: React application served via Nginx (port 3000)
 
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- Ports 80, 5000, 5432, and 6379 available
+- Ports 3000, 5000, 5432, and 6379 available
 
 ## Quick Start (Full Stack)
 
@@ -177,7 +177,7 @@ The frontend service:
 - Builds React/Vite application during image build
 - Serves static files via Nginx
 - Configured for SPA routing
-- Exposes port 80
+- Exposes port 3000 (mapped from container port 80)
 
 ### Network
 
