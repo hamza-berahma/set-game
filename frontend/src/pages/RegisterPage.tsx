@@ -17,7 +17,6 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
         try {
             await register(username, email, password);
             navigate("/lobby");
