@@ -52,11 +52,20 @@ export function isValidSet(card1: Card, card2: Card, card3: Card): boolean {
 
 export function findValidSets(board: Card[]): Card[][] {
     const sets: Card[][] = [];
+    const seen = new Set<string>();
+    
     for (let i = 0; i < board.length; i++) {
         for (let j = i + 1; j < board.length; j++) {
             for (let k = j + 1; k < board.length; k++) {
                 if (isValidSet(board[i], board[j], board[k])) {
-                    sets.push([board[i], board[j], board[k]]);
+                    // Create sorted ID to avoid duplicates
+                    const cardIds = [board[i].id, board[j].id, board[k].id].sort();
+                    const setId = cardIds.join('-');
+                    
+                    if (!seen.has(setId)) {
+                        seen.add(setId);
+                        sets.push([board[i], board[j], board[k]]);
+                    }
                 }
             }
         }

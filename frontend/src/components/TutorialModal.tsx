@@ -80,8 +80,8 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                         ))}
                     </div>
                     <div className="bg-set-green border-4 border-black p-4">
-                        <p className="text-white font-bold uppercase tracking-wider mb-2">✓ Valid SET!</p>
-                        <ul className="text-white text-sm space-y-1">
+                        <p className="text-black font-bold uppercase tracking-wider mb-2">✓ Valid SET!</p>
+                        <ul className="text-black text-sm space-y-1">
                             <li>• Number: All 1, 2, 3 (all different) ✓</li>
                             <li>• Shape: All diamonds (all same) ✓</li>
                             <li>• Shading: All solid (all same) ✓</li>
@@ -104,8 +104,8 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                         ))}
                     </div>
                     <div className="bg-set-green border-4 border-black p-4">
-                        <p className="text-white font-bold uppercase tracking-wider mb-2">✓ Valid SET!</p>
-                        <ul className="text-white text-sm space-y-1">
+                        <p className="text-black font-bold uppercase tracking-wider mb-2">✓ Valid SET!</p>
+                        <ul className="text-black text-sm space-y-1">
                             <li>• Number: All 1 (all same) ✓</li>
                             <li>• Shape: All ovals (all same) ✓</li>
                             <li>• Shading: Solid, Striped, Open (all different) ✓</li>
@@ -128,14 +128,14 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                         ))}
                     </div>
                     <div className="bg-set-red border-4 border-black p-4">
-                        <p className="text-white font-bold uppercase tracking-wider mb-2">✗ Invalid SET</p>
-                        <ul className="text-white text-sm space-y-1">
+                        <p className="text-black font-bold uppercase tracking-wider mb-2">✗ Invalid SET</p>
+                        <ul className="text-black text-sm space-y-1">
                             <li>• Number: 1, 2, 3 (all different) ✓</li>
                             <li>• Shape: Diamond, Oval, Squiggle (all different) ✓</li>
                             <li>• Shading: Solid, Solid, Striped (NOT all same or all different) ✗</li>
                             <li>• Color: All red (all same) ✓</li>
                         </ul>
-                        <p className="text-white text-sm mt-2">
+                        <p className="text-black text-sm mt-2">
                             Since shading is not all same or all different, this is NOT a SET.
                         </p>
                     </div>
