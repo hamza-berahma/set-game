@@ -40,6 +40,6 @@ RUN chmod +x wait-for.sh
 # Expose port
 EXPOSE 5000
 
-# Start server (wait for postgres and redis)
+# Start server (wait for postgres, then start server - redis connection is handled gracefully)
 CMD ["./wait-for.sh", "postgres", "5432", "node", "dist/server.js"]
 
