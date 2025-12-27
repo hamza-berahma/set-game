@@ -111,6 +111,15 @@ export default function GameRoomPage() {
             onGameStateUpdate: (state: GameState) => {
                 setGameState(state);
                 setIsProcessing(false);
+                // Track player names for bots
+                state.players.forEach(playerId => {
+                    if (!playerNames[playerId] && playerId !== user?.user_id && playerId.startsWith('bot-')) {
+                        setPlayerNames(prev => ({
+                            ...prev,
+                            [playerId]: 'Bot',
+                        }));
+                    }
+                });
             },
             onSetFound: (data) => {
                 // Add to event chat
@@ -185,7 +194,7 @@ export default function GameRoomPage() {
                 setIsProcessing(false);
             },
         });
-    }, [user, notificationModal, addEvent]);
+    }, [user, notificationModal, addEvent, playerNames]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {
