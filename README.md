@@ -13,20 +13,37 @@ A multiplayer implementation of the SET card game with real-time gameplay.
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Docker (Recommended)
+
+Start the entire application stack with Docker:
+
+```bash
+# From project root
+sudo docker-compose -f infrastructure/docker-compose.yml up -d
+```
+
+Access the application:
+- **Frontend**: http://localhost:80
+- **Backend API**: http://localhost:5000
+
+See [Infrastructure README](infrastructure/README.md) for detailed Docker instructions.
+
+### Option 2: Local Development
+
+#### Prerequisites
 
 - Node.js 18+
 - PostgreSQL 15+
 - Redis 7+ (optional)
-- Docker and Docker Compose
+- Docker and Docker Compose (for infrastructure)
 
-### Installation
+#### Installation
 
 1. Start infrastructure services:
 
 ```bash
 cd infrastructure
-sudo docker-compose up -d
+sudo docker-compose up -d postgres redis
 ```
 
 2. Set up backend:

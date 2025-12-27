@@ -10,11 +10,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ../backend/migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U setgame"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - setgame-network
 
   redis:
     image: redis:7-alpine
@@ -29,6 +32,54 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - setgame-network
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: setgame-backend
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: setgame
+      DB_USER: setgame
+      DB_PASSWORD: yourpassword
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      CORS_ORIGIN: http://localhost:80,http://localhost:5173
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - setgame-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:5000
+    container_name: setgame-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - setgame-network
+    restart: unless-stopped
+
+networks:
+  setgame-network:
+    driver: bridge
 
 volumes:
   postgres_data:
