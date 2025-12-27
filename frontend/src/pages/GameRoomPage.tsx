@@ -65,7 +65,11 @@ export default function GameRoomPage() {
 
     useEffect(() => {
         if (socket && isConnected && roomId && !hasJoinedRef.current) {
-            socketService.joinRoom(roomId);
+            socketService.joinRoom(roomId, {
+                playWithBots: roomSettings?.playWithBots ?? true,
+                maxPlayers: roomSettings?.maxPlayers,
+                timerDuration: roomSettings?.timerDuration,
+            });
             hasJoinedRef.current = true;
             addEvent({
                 type: 'game_started',
@@ -78,7 +82,7 @@ export default function GameRoomPage() {
                 socketService.leaveRoom();
             }
         };
-    }, [socket, isConnected, roomId, addEvent]);
+    }, [socket, isConnected, roomId, addEvent, roomSettings]);
 
     useEffect(() => {
         if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && gameState?.status === 'active') {
