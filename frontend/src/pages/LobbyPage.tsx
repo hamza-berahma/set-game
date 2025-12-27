@@ -6,6 +6,7 @@ import RoomSettingsModal from '../components/RoomSettingsModal';
 import type { RoomSettings } from '../components/RoomSettingsModal';
 import Modal from '../components/Modal';
 import { useModal, useModalWithContent } from '../hooks/useModal';
+import ProfileAvatar from '../components/ProfileAvatar';
 
 export default function LobbyPage() {
   const { user, logout } = useAuthStore();
@@ -41,9 +42,18 @@ export default function LobbyPage() {
         <div className="bg-white border-8 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl uppercase tracking-wider mb-1 text-black">Welcome, {user?.username}!</h1>
-              <p className="uppercase text-sm tracking-widest text-gray-600 text-black">Game Lobby</p>
+            <div className="flex items-center gap-4">
+              {user?.user_id && (
+                <ProfileAvatar 
+                  userId={user.user_id} 
+                  username={user.username}
+                  size="large"
+                />
+              )}
+              <div>
+                <h1 className="text-3xl uppercase tracking-wider mb-1 text-black">Welcome, {user?.username}!</h1>
+                <p className="uppercase text-sm tracking-widest text-gray-600 text-black">Game Lobby</p>
+              </div>
             </div>
             <button
               onClick={handleLogout}

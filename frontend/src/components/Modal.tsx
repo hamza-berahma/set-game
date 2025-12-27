@@ -143,6 +143,7 @@ export default function Modal({
         }
     }, [isOpen]);
 
+    // Don't render if not open and not animating
     if (!isOpen && !isAnimating) return null;
 
     const bgColor = {
@@ -165,13 +166,13 @@ export default function Modal({
             aria-describedby={contentId}
             data-state={isOpen ? 'open' : 'closing'}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            onClick={closeOnBackdrop ? onClose : undefined}
         >
             {/* Backdrop - dimmed, no blur */}
             <div
                 className={`absolute inset-0 bg-black transition-opacity duration-200 ${
                     isOpen ? 'opacity-50' : 'opacity-0'
                 }`}
+                onClick={closeOnBackdrop ? onClose : undefined}
             />
 
             {/* Modal Content */}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import GameBoard from '../components/GameBoard';
 import { useSocket } from '../hooks/useSocket';
 import { socketService } from '../services/socketService';
@@ -8,6 +9,7 @@ import type { GameState, RoomSettings } from '../types/game';
 import Modal from '../components/Modal';
 import { useModalWithContent } from '../hooks/useModal';
 import ProfileAvatar from '../components/ProfileAvatar';
+import EventChat, { type GameEvent } from '../components/EventChat';
 
 type Notification = {
     message: string;
@@ -17,16 +19,29 @@ type Notification = {
 export default function GameRoomPage() {
     const { roomId } = useParams<{ roomId: string }>();
     const location = useLocation();
+    const navigate = useNavigate();
     const { socket, isConnected, error: socketError } = useSocket();
     const { user } = useAuthStore();
     
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const notificationModal = useModalWithContent<Notification>();
+    const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
     
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const roomSettings = (location.state as { settings?: RoomSettings })?.settings;
+
+    const addEvent = (event: Omit<GameEvent, 'id' | 'timestamp'>) => {
+        setGameEvents((prev) => [
+            ...prev,
+            {
+                ...event,
+                id: `${Date.now()}-${Math.random()}`,
+                timestamp: new Date(),
+            },
+        ]);
+    };
 
     useEffect(() => {
         if (socket) {
@@ -40,13 +55,17 @@ export default function GameRoomPage() {
     useEffect(() => {
         if (socket && isConnected && roomId) {
             socketService.joinRoom(roomId);
+            addEvent({
+                type: 'game_started',
+                message: 'Game started!',
+            });
         }
         return () => {
             if (roomId) {
                 socketService.leaveRoom();
             }
         };
-    }, [socket, isConnected, roomId]);
+    }, [socket, isConnected, roomId, addEvent]);
 
     useEffect(() => {
         if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && gameState?.status === 'active') {
@@ -85,9 +104,21 @@ export default function GameRoomPage() {
                 setIsProcessing(false);
             },
             onSetFound: (data) => {
-                // Success notifications don't show modals - just update game state
-                // The score update will be visible in the player list
-                if (data.playerId !== user?.user_id) {
+                // Add to event chat
+                if (data.playerId === user?.user_id) {
+                    addEvent({
+                        type: 'set_found',
+                        message: `You found a SET! +${data.newScore} points`,
+                        playerId: data.playerId,
+                        playerName: data.playerUsername,
+                    });
+                } else {
+                    addEvent({
+                        type: 'set_found',
+                        message: `${data.playerUsername} found a SET!`,
+                        playerId: data.playerId,
+                        playerName: data.playerUsername,
+                    });
                     // Only show info modal for other players' achievements
                     notificationModal.open({
                         message: `${data.playerUsername} found a SET!`,
@@ -96,24 +127,44 @@ export default function GameRoomPage() {
                 }
             },
             onPlayerJoined: (data) => {
+                addEvent({
+                    type: 'player_joined',
+                    message: `${data.username} joined the game`,
+                    playerId: data.playerId,
+                    playerName: data.username,
+                });
                 notificationModal.open({
                     message: `${data.username} joined the game`,
                     type: 'info',
                 });
             },
             onPlayerLeft: (data) => {
+                addEvent({
+                    type: 'player_left',
+                    message: `${data.username} left the game`,
+                    playerId: data.playerId,
+                    playerName: data.username,
+                });
                 notificationModal.open({
                     message: `${data.username} left the game`,
                     type: 'info',
                 });
             },
             onGameEnded: () => {
+                addEvent({
+                    type: 'game_ended',
+                    message: 'Game ended!',
+                });
                 notificationModal.open({
                     message: 'Game ended!',
                     type: 'info',
                 });
             },
             onError: (error) => {
+                addEvent({
+                    type: 'error',
+                    message: error.message,
+                });
                 notificationModal.open({
                     message: error.message,
                     type: 'error',
@@ -121,7 +172,7 @@ export default function GameRoomPage() {
                 setIsProcessing(false);
             },
         });
-    }, [user, notificationModal]);
+    }, [user, notificationModal, addEvent]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {
@@ -140,6 +191,13 @@ export default function GameRoomPage() {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${String(secs).padStart(2, '0')}`;
+    };
+
+    const handleExit = () => {
+        if (socket && roomId) {
+            socketService.leaveRoom();
+        }
+        navigate('/lobby');
     };
 
     // Display connection status
@@ -168,9 +226,19 @@ export default function GameRoomPage() {
                     <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4">
                         <div className="flex items-center justify-between mb-2">
                             <h1 className="text-3xl font-bold uppercase tracking-wider text-black">Game Room: {roomId}</h1>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-set-green border-2 border-black"></div>
-                                <span className="text-sm uppercase tracking-wider text-black">Connected</span>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-set-green border-2 border-black"></div>
+                                    <span className="text-sm uppercase tracking-wider text-black">Connected</span>
+                                </div>
+                                <button
+                                    onClick={handleExit}
+                                    className="px-4 py-2 bg-set-red hover:bg-[#AA0000] text-white border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold flex items-center gap-2"
+                                    style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Exit
+                                </button>
                             </div>
                         </div>
                         {gameState && (
@@ -192,11 +260,17 @@ export default function GameRoomPage() {
                 {/* Main Game Layout */}
                 <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
                     {/* Game Board */}
-                    <div>
+                    <div className="space-y-6">
                         <GameBoard
                             cards={cards}
                             onCardSelect={handleCardSelect}
                             isProcessing={isProcessing}
+                        />
+                        
+                        {/* Event Chat */}
+                        <EventChat 
+                            events={gameEvents} 
+                            currentUserId={user?.user_id}
                         />
                     </div>
 
