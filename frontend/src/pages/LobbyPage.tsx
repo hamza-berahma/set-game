@@ -5,15 +5,14 @@ import { Plus, Users } from 'lucide-react';
 import RoomSettingsModal from '../components/RoomSettingsModal';
 import type { RoomSettings } from '../components/RoomSettingsModal';
 import Modal from '../components/Modal';
-import { useModal } from '../hooks/useModal';
+import { useModal, useModalWithContent } from '../hooks/useModal';
 
 export default function LobbyPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState('');
   const settingsModal = useModal();
-  const errorModal = useModal();
-  const [errorMessage, setErrorMessage] = useState('');
+  const errorModal = useModalWithContent<string>();
 
   const handleLogout = () => {
     logout();
@@ -32,8 +31,7 @@ export default function LobbyPage() {
     if (roomId.trim()) {
       navigate(`/game/${roomId.trim()}`);
     } else {
-      setErrorMessage('Please enter a room ID');
-      errorModal.open();
+      errorModal.open('Please enter a room ID');
     }
   };
 
@@ -113,31 +111,23 @@ export default function LobbyPage() {
       />
 
       {/* Error Modal */}
-      <Modal
-        isOpen={errorModal.isOpen}
-        onClose={() => {
-          errorModal.close();
-          setErrorMessage("");
-        }}
-        title="Error"
-        type="error"
-      >
-        {errorMessage && (
-          <>
-            <p className="uppercase tracking-wider text-black">{errorMessage}</p>
-            <button
-              onClick={() => {
-                errorModal.close();
-                setErrorMessage("");
-              }}
-              className="mt-4 w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
-              style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
-            >
-              Close
-            </button>
-          </>
-        )}
-      </Modal>
+      {errorModal.content && (
+        <Modal
+          isOpen={errorModal.isOpen}
+          onClose={errorModal.close}
+          title="Error"
+          type="error"
+        >
+          <p className="uppercase tracking-wider text-black mb-4">{errorModal.content}</p>
+          <button
+            onClick={errorModal.close}
+            className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+            style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+          >
+            Close
+          </button>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import Card from "./Card";
 import type { Card as CardType } from "../types/game";
 import { isValidSet } from "../utils/game";
 import Modal from "./Modal";
-import { useModal } from "../hooks/useModal";
+import { useModalWithContent } from "../hooks/useModal";
 
 interface GameBoardProps {
     cards: CardType[];
@@ -13,14 +13,12 @@ interface GameBoardProps {
 
 export default function GameBoard({ cards, onCardSelect, isProcessing = false }: GameBoardProps) {
     const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
-    const [validationError, setValidationError] = useState<string | null>(null);
     const [isValidating, setIsValidating] = useState(false);
-    const errorModal = useModal();
+    const errorModal = useModalWithContent<string>();
 
     const handleCardClick = (cardId: string) => {
         if (isProcessing || isValidating) return;
 
-        setValidationError(null);
         errorModal.close();
 
         setSelectedCardIds((prev) => {
@@ -59,25 +57,21 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                     onCardSelect(cardIds);
                     setSelectedCardIds([]);
                     setIsValidating(false);
-                    setValidationError(null);
                     errorModal.close();
                 }, 300);
             } else {
                 const errorMsg = "Selected cards do not form a valid SET. Each attribute must be all the same or all different.";
-                setValidationError(errorMsg);
-                errorModal.open();
+                errorModal.open(errorMsg);
 
                 setTimeout(() => {
                     setSelectedCardIds([]);
                     setIsValidating(false);
-                    setValidationError(null);
                     errorModal.close();
                 }, 2000);
             }
         } else if (selectedCardIds.length !== 3) {
             if (isValidating) {
                 setIsValidating(false);
-                setValidationError(null);
                 errorModal.close();
             }
         }
@@ -89,7 +83,6 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
         
         if (!allSelectedStillOnBoard && selectedCardIds.length > 0) {
             setSelectedCardIds([]);
-            setValidationError(null);
             setIsValidating(false);
             errorModal.close();
         }
@@ -99,7 +92,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
 
     return (
         <div className="space-y-4">
-                {showProcessing && !validationError && (
+                {showProcessing && !errorModal.content && (
                     <div className="bg-set-purple border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         Validating selection...
                     </div>
@@ -129,22 +122,16 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                 </div>
 
                 <Modal
-                    isOpen={errorModal.isOpen && validationError !== null}
-                    onClose={() => {
-                        errorModal.close();
-                        setValidationError(null);
-                    }}
+                    isOpen={errorModal.isOpen}
+                    onClose={errorModal.close}
                     title="Invalid SET"
                     type="error"
                 >
-                    {validationError && (
+                    {errorModal.content && (
                         <>
-                            <p className="uppercase tracking-wider text-black mb-4">{validationError}</p>
+                            <p className="uppercase tracking-wider text-black mb-4">{errorModal.content}</p>
                             <button
-                                onClick={() => {
-                                    errorModal.close();
-                                    setValidationError(null);
-                                }}
+                                onClick={errorModal.close}
                                 className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
                                 style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
                             >

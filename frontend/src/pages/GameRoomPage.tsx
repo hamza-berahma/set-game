@@ -6,7 +6,12 @@ import { socketService } from '../services/socketService';
 import { useAuthStore } from '../stores/authStore';
 import type { GameState, RoomSettings } from '../types/game';
 import Modal from '../components/Modal';
-import { useModal } from '../hooks/useModal';
+import { useModalWithContent } from '../hooks/useModal';
+
+type Notification = {
+    message: string;
+    type: 'success' | 'error' | 'info';
+};
 
 export default function GameRoomPage() {
     const { roomId } = useParams<{ roomId: string }>();
@@ -16,11 +21,7 @@ export default function GameRoomPage() {
     
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const notificationModal = useModal();
-    const [notification, setNotification] = useState<{
-        message: string;
-        type: 'success' | 'error' | 'info';
-    } | null>(null);
+    const notificationModal = useModalWithContent<Notification>();
     
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -84,57 +85,51 @@ export default function GameRoomPage() {
             },
             onSetFound: (data) => {
                 if (data.playerId === user?.user_id) {
-                    setNotification({
+                    notificationModal.open({
                         message: `You found a SET! +${data.newScore} points`,
                         type: 'success',
                     });
                 } else {
-                    setNotification({
+                    notificationModal.open({
                         message: `${data.playerUsername} found a SET!`,
                         type: 'info',
                     });
                 }
-                notificationModal.open();
             },
             onPlayerJoined: (data) => {
-                setNotification({
+                notificationModal.open({
                     message: `${data.username} joined the game`,
                     type: 'info',
                 });
-                notificationModal.open();
             },
             onPlayerLeft: (data) => {
-                setNotification({
+                notificationModal.open({
                     message: `${data.username} left the game`,
                     type: 'info',
                 });
-                notificationModal.open();
             },
             onGameEnded: () => {
-                setNotification({
+                notificationModal.open({
                     message: 'Game ended!',
                     type: 'info',
                 });
-                notificationModal.open();
             },
             onError: (error) => {
-                setNotification({
+                notificationModal.open({
                     message: error.message,
                     type: 'error',
                 });
                 setIsProcessing(false);
-                notificationModal.open();
             },
         });
     }, [user, notificationModal]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {
-            setNotification({
+            notificationModal.open({
                 message: 'Not connected to server',
                 type: 'error',
             });
-            notificationModal.open();
             return;
         }
 
@@ -285,43 +280,35 @@ export default function GameRoomPage() {
                 )}
 
                 {/* Notification Modal */}
-                <Modal
-                    isOpen={notificationModal.isOpen && notification !== null}
-                    onClose={() => {
-                        notificationModal.close();
-                        setNotification(null);
-                    }}
-                    title={
-                        notification?.type === 'success' ? 'Success' :
-                        notification?.type === 'error' ? 'Error' :
-                        'Notification'
-                    }
-                    type={notification?.type || 'info'}
-                >
-                    {notification && (
-                        <>
-                            <p className="uppercase tracking-wider text-black mb-4">{notification.message}</p>
-                            <button
-                                onClick={() => {
-                                    notificationModal.close();
-                                    setNotification(null);
-                                }}
-                                className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
-                                    notification.type === 'success' ? 'bg-set-green hover:bg-[#008800]' :
-                                    notification.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
-                                    'bg-set-purple hover:bg-[#5500AA]'
-                                }`}
-                                style={{
-                                    color: '#ffffff',
-                                    backgroundColor: notification.type === 'success' ? '#00AA00' :
-                                        notification.type === 'error' ? '#CC0000' : '#6600CC'
-                                }}
-                            >
-                                Close
-                            </button>
-                        </>
-                    )}
-                </Modal>
+                {notificationModal.content && (
+                    <Modal
+                        isOpen={notificationModal.isOpen}
+                        onClose={notificationModal.close}
+                        title={
+                            notificationModal.content.type === 'success' ? 'Success' :
+                            notificationModal.content.type === 'error' ? 'Error' :
+                            'Notification'
+                        }
+                        type={notificationModal.content.type}
+                    >
+                        <p className="uppercase tracking-wider text-black mb-4">{notificationModal.content.message}</p>
+                        <button
+                            onClick={notificationModal.close}
+                            className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
+                                notificationModal.content.type === 'success' ? 'bg-set-green hover:bg-[#008800]' :
+                                notificationModal.content.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
+                                'bg-set-purple hover:bg-[#5500AA]'
+                            }`}
+                            style={{
+                                color: '#ffffff',
+                                backgroundColor: notificationModal.content.type === 'success' ? '#00AA00' :
+                                    notificationModal.content.type === 'error' ? '#CC0000' : '#6600CC'
+                            }}
+                        >
+                            Close
+                        </button>
+                    </Modal>
+                )}
             </div>
         </div>
     );
