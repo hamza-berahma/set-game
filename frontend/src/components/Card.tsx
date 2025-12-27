@@ -7,7 +7,6 @@ interface CardProps {
 }
 
 export default function Card({ card, isSelected = false, onClick }: CardProps) {
-    // Generate unique pattern IDs per card to avoid SVG conflicts
     const patternIdRed = `stripes-c0-${card.id}`;
     const patternIdGreen = `stripes-c1-${card.id}`;
     const patternIdPurple = `stripes-c2-${card.id}`;
@@ -36,7 +35,6 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
         };
 
         const shapes = [];
-        // Render each shape with proper spacing - shapes are spaced vertically
         for (let i = 0; i < card.number; i++) {
             if (card.shape === 'diamond') {
                 shapes.push(
@@ -70,7 +68,6 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
             <div 
                 className={`card-inner ${isSelected ? 'selected' : ''}`}
             >
-                {/* Hidden SVG for patterns - defined once per card */}
                 <svg width="0" height="0" style={{ position: 'absolute' }}>
                     <defs>
                         <pattern id={patternIdRed} x="0" width="12" height="8" patternUnits="userSpaceOnUse" stroke="#CC0000" strokeWidth="0.3">
@@ -109,7 +106,6 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
                     </defs>
                 </svg>
 
-                {/* Render shapes based on number (1, 2, or 3) */}
                 {renderShape()}
             </div>
         </div>

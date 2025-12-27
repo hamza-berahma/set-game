@@ -22,12 +22,10 @@ export default function GameRoomPage() {
         type: 'success' | 'error' | 'info';
     } | null>(null);
     
-    // Timer state
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const roomSettings = (location.state as { settings?: RoomSettings })?.settings;
 
-    // Initialize socket service
     useEffect(() => {
         if (socket) {
             socketService.setSocket(socket);
@@ -37,7 +35,6 @@ export default function GameRoomPage() {
         };
     }, [socket]);
 
-    // Join room when socket is connected and roomId is available
     useEffect(() => {
         if (socket && isConnected && roomId) {
             socketService.joinRoom(roomId);
@@ -49,7 +46,6 @@ export default function GameRoomPage() {
         };
     }, [socket, isConnected, roomId]);
 
-    // Timer management
     useEffect(() => {
         if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && gameState?.status === 'active') {
             setTimeRemaining(roomSettings.timerDuration);
@@ -80,7 +76,6 @@ export default function GameRoomPage() {
         }
     }, [roomSettings?.timerDuration, gameState?.status]);
 
-    // Set up event handlers
     useEffect(() => {
         socketService.setHandlers({
             onGameStateUpdate: (state: GameState) => {
@@ -195,14 +190,6 @@ export default function GameRoomPage() {
                                         <span className="text-black"> / {roomSettings.maxPlayers}</span>
                                     )}
                                 </div>
-                                {timeRemaining !== null && (
-                                    <div className={`font-bold ${
-                                        timeRemaining < 30 ? 'text-set-red' : 
-                                        timeRemaining < 60 ? 'text-gold' : 'text-black'
-                                    }`}>
-                                        Time: {formatTime(timeRemaining)}
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
@@ -222,6 +209,29 @@ export default function GameRoomPage() {
                     {/* Player Scores Sidebar */}
                     {gameState && gameState.players.length > 0 && (
                         <div>
+                            {/* Timer Display */}
+                            {timeRemaining !== null && (
+                                <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
+                                    <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Timer</h3>
+                                    <div className={`border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
+                                        timeRemaining < 30 ? 'bg-set-red' : 
+                                        timeRemaining < 60 ? 'bg-gold' : 'bg-white'
+                                    }`}>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm uppercase tracking-wider font-semibold text-black">
+                                                Time Remaining
+                                            </span>
+                                        </div>
+                                        <div className={`text-2xl font-bold ${
+                                            timeRemaining < 30 ? 'text-white' : 'text-black'
+                                        }`}>
+                                            {formatTime(timeRemaining)}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Players */}
                             <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
                                 <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Players</h3>
                                 <div className="space-y-3">
@@ -275,35 +285,43 @@ export default function GameRoomPage() {
                 )}
 
                 {/* Notification Modal */}
-                {notification && (
-                    <Modal
-                        isOpen={notificationModal.isOpen}
-                        onClose={notificationModal.close}
-                        title={
-                            notification.type === 'success' ? 'Success' :
-                            notification.type === 'error' ? 'Error' :
-                            'Notification'
-                        }
-                        type={notification.type}
-                    >
-                        <p className="uppercase tracking-wider text-black mb-4">{notification.message}</p>
-                        <button
-                            onClick={notificationModal.close}
-                            className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
-                                notification.type === 'success' ? 'bg-set-green hover:bg-[#008800]' :
-                                notification.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
-                                'bg-set-purple hover:bg-[#5500AA]'
-                            }`}
-                            style={{
-                                color: '#ffffff',
-                                backgroundColor: notification.type === 'success' ? '#00AA00' :
-                                    notification.type === 'error' ? '#CC0000' : '#6600CC'
-                            }}
-                        >
-                            Close
-                        </button>
-                    </Modal>
-                )}
+                <Modal
+                    isOpen={notificationModal.isOpen && notification !== null}
+                    onClose={() => {
+                        notificationModal.close();
+                        setNotification(null);
+                    }}
+                    title={
+                        notification?.type === 'success' ? 'Success' :
+                        notification?.type === 'error' ? 'Error' :
+                        'Notification'
+                    }
+                    type={notification?.type || 'info'}
+                >
+                    {notification && (
+                        <>
+                            <p className="uppercase tracking-wider text-black mb-4">{notification.message}</p>
+                            <button
+                                onClick={() => {
+                                    notificationModal.close();
+                                    setNotification(null);
+                                }}
+                                className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
+                                    notification.type === 'success' ? 'bg-set-green hover:bg-[#008800]' :
+                                    notification.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
+                                    'bg-set-purple hover:bg-[#5500AA]'
+                                }`}
+                                style={{
+                                    color: '#ffffff',
+                                    backgroundColor: notification.type === 'success' ? '#00AA00' :
+                                        notification.type === 'error' ? '#CC0000' : '#6600CC'
+                                }}
+                            >
+                                Close
+                            </button>
+                        </>
+                    )}
+                </Modal>
             </div>
         </div>
     );

@@ -6,11 +6,11 @@ interface ModalProps {
     onClose: () => void;
     title?: string;
     children: React.ReactNode;
-    type?: 'success' | 'error' | 'info' | 'warning';
+    type?: 'success' | 'error' | 'info' | 'warning' | 'white';
+    background?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children, type = 'info' }: ModalProps) {
-    // Close on Escape key
+export default function Modal({ isOpen, onClose, title, children, type = 'info', background }: ModalProps) {
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) {
@@ -23,16 +23,17 @@ export default function Modal({ isOpen, onClose, title, children, type = 'info' 
 
     if (!isOpen) return null;
 
-    const bgColor = {
+    const bgColor = background || {
         success: 'bg-set-green',
         error: 'bg-set-red',
         info: 'bg-set-purple',
         warning: 'bg-gold',
+        white: 'bg-white',
     }[type];
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-10 backdrop-blur-[2px]"
             onClick={onClose}
         >
             <div
@@ -46,17 +47,15 @@ export default function Modal({ isOpen, onClose, title, children, type = 'info' 
                     aria-label="Close"
                 >
                     <X className="w-5 h-5 text-black" />
-                </button>
+                    </button>
 
-                {/* Title */}
-                {title && (
+                    {title && (
                     <h2 className="text-2xl font-bold uppercase tracking-wider mb-4 text-black pr-10">
                         {title}
-                    </h2>
-                )}
+                        </h2>
+                    )}
 
-                {/* Content */}
-                <div className="text-black">{children}</div>
+                    <div className="text-black">{children}</div>
             </div>
         </div>
     );

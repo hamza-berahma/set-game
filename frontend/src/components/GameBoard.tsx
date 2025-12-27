@@ -12,131 +12,149 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ cards, onCardSelect, isProcessing = false }: GameBoardProps) {
-    const [selectedCards, setSelectedCards] = useState<number[]>([]);
+    const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [isValidating, setIsValidating] = useState(false);
     const errorModal = useModal();
 
-    const handleCardClick = (index: number) => {
+    const handleCardClick = (cardId: string) => {
         if (isProcessing || isValidating) return;
 
-        // Clear any previous errors
         setValidationError(null);
+        errorModal.close();
 
-        setSelectedCards((prev) => {
-            if (prev.includes(index)) {
-                // Deselect
-                return prev.filter((i) => i !== index);
+        setSelectedCardIds((prev) => {
+            if (prev.includes(cardId)) {
+                return prev.filter((id) => id !== cardId);
             } else if (prev.length < 3) {
-                // Select (max 3)
-                return [...prev, index];
+                return [...prev, cardId];
             }
             return prev;
         });
     };
 
     useEffect(() => {
-        if (selectedCards.length === 3) {
-            const selectedCardObjects = selectedCards.map((idx) => cards[idx]);
+        if (selectedCardIds.length === 3 && !isValidating) {
+            const selectedCardObjects = selectedCardIds
+                .map((cardId) => cards.find((c) => c.id === cardId))
+                .filter((card): card is CardType => card !== undefined);
 
-            // Validate the SET
+            if (selectedCardObjects.length !== 3) {
+                setSelectedCardIds([]);
+                return;
+            }
+
             const isValid = isValidSet(
                 selectedCardObjects[0],
                 selectedCardObjects[1],
                 selectedCardObjects[2],
             );
 
-            if (isValid) {
-                // Valid SET - call onCardSelect and clear selection
-                setIsValidating(true);
-                const cardIds = selectedCards.map((idx) => cards[idx].id);
+            setIsValidating(true);
 
-                // Simulate validation delay
+            if (isValid) {
+                const cardIds = selectedCardObjects.map((c) => c.id);
+
                 setTimeout(() => {
                     onCardSelect(cardIds);
-                    setSelectedCards([]);
+                    setSelectedCardIds([]);
                     setIsValidating(false);
                     setValidationError(null);
+                    errorModal.close();
                 }, 300);
             } else {
-                // Invalid SET - show error
-                setIsValidating(true);
                 const errorMsg = "Selected cards do not form a valid SET. Each attribute must be all the same or all different.";
                 setValidationError(errorMsg);
                 errorModal.open();
 
-                // Clear selection after showing error
                 setTimeout(() => {
-                    setSelectedCards([]);
+                    setSelectedCardIds([]);
                     setIsValidating(false);
                     setValidationError(null);
+                    errorModal.close();
                 }, 2000);
             }
+        } else if (selectedCardIds.length !== 3) {
+            if (isValidating) {
+                setIsValidating(false);
+                setValidationError(null);
+                errorModal.close();
+            }
         }
-    }, [selectedCards, cards, onCardSelect]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedCardIds]);
 
-    // Reset selection and errors when cards change
     useEffect(() => {
-        setSelectedCards([]);
-        setValidationError(null);
-        setIsValidating(false);
+        const cardIdsOnBoard = new Set(cards.map((c) => c.id));
+        const allSelectedStillOnBoard = selectedCardIds.every((id) => cardIdsOnBoard.has(id));
+        
+        if (!allSelectedStillOnBoard && selectedCardIds.length > 0) {
+            setSelectedCardIds([]);
+            setValidationError(null);
+            setIsValidating(false);
+            errorModal.close();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cards]);
 
     const showProcessing = isProcessing || isValidating;
 
     return (
         <div className="space-y-4">
-                {/* Loading/Processing indicator */}
                 {showProcessing && !validationError && (
                     <div className="bg-set-purple border-4 border-black text-white px-4 py-3 uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         Validating selection...
                     </div>
                 )}
 
-                {/* Game Board Container */}
                 <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 md:p-6">
-                    {/* Card Grid - Fixed 3 rows × 4 columns */}
                     <div
                         className={`card-grid grid grid-cols-4 justify-items-center ${showProcessing ? "opacity-50 pointer-events-none" : ""}`}
                     >
-                        {cards.map((card, index) => (
+                        {cards.map((card) => (
                             <Card
                                 key={card.id}
                                 card={card}
-                                isSelected={selectedCards.includes(index)}
-                                onClick={() => handleCardClick(index)}
+                                isSelected={selectedCardIds.includes(card.id)}
+                                onClick={() => handleCardClick(card.id)}
                             />
                         ))}
                     </div>
 
-                    {/* Selected Cards Counter */}
-                    {selectedCards.length > 0 && (
+                    {selectedCardIds.length > 0 && (
                         <div className="mt-6 text-center">
                             <div className="inline-flex items-center gap-2 bg-white border-4 border-black px-6 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wider text-black">
-                                <span>{selectedCards.length}/3 Selected</span>
+                                <span>{selectedCardIds.length}/3 Selected</span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Error Modal */}
-                {validationError && (
-                    <Modal
-                        isOpen={errorModal.isOpen}
-                        onClose={errorModal.close}
-                        title="Invalid SET"
-                        type="error"
-                    >
-                        <p className="uppercase tracking-wider text-black mb-4">{validationError}</p>
-                        <button
-                            onClick={errorModal.close}
-                            className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
-                            style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
-                        >
-                            Close
-                        </button>
-                    </Modal>
-                )}
+                <Modal
+                    isOpen={errorModal.isOpen && validationError !== null}
+                    onClose={() => {
+                        errorModal.close();
+                        setValidationError(null);
+                    }}
+                    title="Invalid SET"
+                    type="error"
+                >
+                    {validationError && (
+                        <>
+                            <p className="uppercase tracking-wider text-black mb-4">{validationError}</p>
+                            <button
+                                onClick={() => {
+                                    errorModal.close();
+                                    setValidationError(null);
+                                }}
+                                className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+                                style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+                            >
+                                Close
+                            </button>
+                        </>
+                    )}
+                </Modal>
         </div>
     );
 }

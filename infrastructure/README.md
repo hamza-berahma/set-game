@@ -14,45 +14,54 @@ This directory contains Docker Compose configuration for the SET game backend se
 
 ## Setup
 
+**Note:** These commands require `sudo` on most Linux systems.
+
 ### Start all services
 
 ```bash
-docker-compose up -d
+sudo docker-compose -f infrastructure/docker-compose.yml up -d
 ```
 
 ### Start individual services
 
 ```bash
 # Start PostgreSQL only
-docker-compose up -d postgres
+sudo docker-compose -f infrastructure/docker-compose.yml up -d postgres
 
 # Start Redis only
-docker-compose up -d redis
+sudo docker-compose -f infrastructure/docker-compose.yml up -d redis
+```
+
+### Alternative: Run from project root
+
+```bash
+cd infrastructure
+sudo docker-compose up -d
 ```
 
 ### Stop services
 
 ```bash
-docker-compose down
+sudo docker-compose -f infrastructure/docker-compose.yml down
 ```
 
 ### View logs
 
 ```bash
 # All services
-docker-compose logs -f
+sudo docker-compose -f infrastructure/docker-compose.yml logs -f
 
 # Redis only
-docker-compose logs -f redis
+sudo docker-compose -f infrastructure/docker-compose.yml logs -f redis
 
 # PostgreSQL only
-docker-compose logs -f postgres
+sudo docker-compose -f infrastructure/docker-compose.yml logs -f postgres
 ```
 
 ### Check service status
 
 ```bash
-docker-compose ps
+sudo docker-compose -f infrastructure/docker-compose.yml ps
 ```
 
 ## Redis Configuration
@@ -68,13 +77,15 @@ The backend will automatically connect to Redis at `redis://localhost:6379`. You
 
 ```bash
 # Connect to Redis CLI
-docker exec -it setgame-redis redis-cli
+sudo docker exec -it setgame-redis redis-cli
 
 # Test commands in Redis CLI
 PING  # Should return PONG
 SET test "hello"  # Set a test key
 GET test  # Should return "hello"
 ```
+
+**Note:** Redis is optional. The application will work without it using in-memory storage, but game states will not persist across server restarts. See `START_REDIS.md` in the project root for more details.
 
 ## PostgreSQL Configuration
 

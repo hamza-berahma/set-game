@@ -12,7 +12,7 @@ COMMENT ON COLUMN matches.timer_duration_seconds IS 'Timer duration in seconds f
 CREATE TABLE IF NOT EXISTS game_event_log (
     event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     match_id UUID REFERENCES matches(match_id) ON DELETE CASCADE,
-    room_id UUID REFERENCES game_rooms(room_id) ON DELETE CASCADE,
+    room_id VARCHAR(255), -- Store room ID as string (can be UUID or custom format)
     user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     event_type VARCHAR(50) NOT NULL,
     event_data JSONB,

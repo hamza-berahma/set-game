@@ -35,7 +35,7 @@ export default function RoomSettingsModal({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Room Settings" type="info">
+        <Modal isOpen={isOpen} onClose={onClose} title="Room Settings" type="white">
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Room Name */}
                 <div>
@@ -73,23 +73,21 @@ export default function RoomSettingsModal({
                 {/* Timer Duration */}
                 <div>
                     <label className="block text-sm font-semibold uppercase tracking-wider mb-2 text-black">
-                        Timer Duration (seconds)
+                        Timer Duration
                     </label>
-                    <input
-                        type="number"
+                    <select
                         value={settings.timerDuration}
-                        onChange={(e) => setSettings({ ...settings, timerDuration: parseInt(e.target.value) || 0 })}
-                        min={0}
-                        max={3600}
-                        step={30}
+                        onChange={(e) => setSettings({ ...settings, timerDuration: parseInt(e.target.value) })}
                         className="w-full px-4 py-3 border-4 border-black bg-white text-black focus:outline-none focus:ring-4 focus:ring-gold uppercase tracking-wider"
-                        placeholder="0 = No timer"
-                    />
-                    <p className="mt-1 text-xs uppercase tracking-wider text-black opacity-70">
-                        {settings.timerDuration === 0
-                            ? 'No timer - game continues until completion'
-                            : `${Math.floor(settings.timerDuration / 60)}:${String(settings.timerDuration % 60).padStart(2, '0')}`}
-                    </p>
+                    >
+                        <option value={0}>No Timer</option>
+                        <option value={60}>1 Minute</option>
+                        <option value={120}>2 Minutes</option>
+                        <option value={180}>3 Minutes</option>
+                        <option value={300}>5 Minutes</option>
+                        <option value={600}>10 Minutes</option>
+                        <option value={900}>15 Minutes</option>
+                    </select>
                 </div>
 
                 {/* Private Room */}

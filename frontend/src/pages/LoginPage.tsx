@@ -84,23 +84,31 @@ export default function LoginPage() {
             </div>
 
             {/* Error Modal */}
-            {error && (
-                <Modal
-                    isOpen={errorModal.isOpen}
-                    onClose={errorModal.close}
-                    title="Login Error"
-                    type="error"
-                >
-                    <p className="uppercase tracking-wider text-black mb-4">{error}</p>
-                    <button
-                        onClick={errorModal.close}
-                        className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
-                        style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
-                    >
-                        Close
-                    </button>
-                </Modal>
-            )}
+            <Modal
+                isOpen={errorModal.isOpen}
+                onClose={() => {
+                    errorModal.close();
+                    setError("");
+                }}
+                title="Login Error"
+                type="error"
+            >
+                {error && (
+                    <>
+                        <p className="uppercase tracking-wider text-black mb-4">{error}</p>
+                        <button
+                            onClick={() => {
+                                errorModal.close();
+                                setError("");
+                            }}
+                            className="w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+                            style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+                        >
+                            Close
+                        </button>
+                    </>
+                )}
+            </Modal>
         </div>
     );
 }

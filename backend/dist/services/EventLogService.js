@@ -15,12 +15,33 @@ class EventLogService {
     async logEvent(eventType, data) {
         try {
             const { matchId, roomId, userId, eventData } = data;
+            // Convert eventData to JSON string if provided
+            const eventDataJson = eventData ? JSON.stringify(eventData) : null;
+            // Handle UUID validation for user_id (must be valid UUID for foreign key constraint)
+            let userIdValue = null;
+            if (userId) {
+                // Check if it's a valid UUID format
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(userId)) {
+                    userIdValue = userId;
+                }
+                else {
+                    // If not a UUID, store as null to avoid foreign key constraint violation
+                    // This can happen if we're using string IDs instead of UUIDs
+                    // The event will still be logged, just without user_id reference
+                }
+            }
             await database_1.default.query(`INSERT INTO game_event_log (match_id, room_id, user_id, event_type, event_data)
-                 VALUES ($1, $2, $3, $4, $5)`, [matchId || null, roomId || null, userId || null, eventType, eventData ? JSON.stringify(eventData) : null]);
+                 VALUES ($1, $2, $3, $4, $5)`, [matchId || null, roomId || null, userIdValue, eventType, eventDataJson]);
         }
         catch (error) {
-            // Log but don't throw - event logging should not break the game
-            console.error("Error logging event:", error);
+            // Silently handle missing table or other database errors - event logging is optional
+            // Only log if it's not a "table doesn't exist" error (migration not run yet)
+            if (error?.code !== '42P01') {
+                // Log unexpected errors, but don't spam
+                console.error("Error logging event:", error?.message || error);
+            }
+            // Don't throw - event logging should not break the game
         }
     }
     /**
