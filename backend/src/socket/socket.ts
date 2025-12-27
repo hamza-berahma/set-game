@@ -116,6 +116,8 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                         timerDuration: settings?.timerDuration,
                         maxPlayers: settings?.maxPlayers,
                         playWithBots: settings?.playWithBots,
+                        isPrivate: settings?.isPrivate,
+                        roomName: settings?.roomName,
                     });
                     
                     await gameService.addPlayerToRoom(roomId, user.userId);

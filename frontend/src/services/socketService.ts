@@ -110,7 +110,7 @@ export class SocketService {
         this.setupEventListeners();
     }
 
-    joinRoom(roomId: string, settings?: { playWithBots?: boolean; maxPlayers?: number; timerDuration?: number }) {
+    joinRoom(roomId: string, settings?: { playWithBots?: boolean; maxPlayers?: number; timerDuration?: number; isPrivate?: boolean; roomName?: string }) {
         if (!this.socket) {
             console.error('Socket not connected');
             return;

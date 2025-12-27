@@ -13,6 +13,8 @@ export interface JoinRoomData {
         playWithBots?: boolean;
         maxPlayers?: number;
         timerDuration?: number;
+        isPrivate?: boolean;
+        roomName?: string;
     };
 }
 

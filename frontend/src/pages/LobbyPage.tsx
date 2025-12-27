@@ -7,6 +7,7 @@ import type { RoomSettings } from '../components/RoomSettingsModal';
 import Modal from '../components/Modal';
 import { useModal, useModalWithContent } from '../hooks/useModal';
 import ProfileAvatar from '../components/ProfileAvatar';
+import PublicGamesList from '../components/PublicGamesList';
 
 export default function LobbyPage() {
   const { user, logout } = useAuthStore();
@@ -88,7 +89,7 @@ export default function LobbyPage() {
               <p className="text-gray-600 mb-4 uppercase text-sm tracking-wider text-black">
                 Enter a room ID to join an existing game.
               </p>
-              <form onSubmit={handleJoinRoom} className="flex gap-2">
+              <form onSubmit={handleJoinRoom} className="flex gap-2 mb-6">
                 <input
                   type="text"
                   value={roomId}
@@ -109,6 +110,10 @@ export default function LobbyPage() {
                   Join Room
                 </button>
               </form>
+              
+              <div className="mt-6">
+                <PublicGamesList />
+              </div>
             </div>
           </div>
         </div>

@@ -80,47 +80,56 @@ export class BotAI {
     }
 
     private selectSetWithHeuristic(sets: Card[][]): Card[] {
+        if (Math.random() < 0.3) {
+            return sets[Math.floor(Math.random() * sets.length)];
+        }
+        
         const scoredSets = sets.map(set => {
             let score = 0;
             const [c1, c2, c3] = set;
             
-            if (c1.number === c2.number && c2.number === c3.number) score += 2;
-            if (c1.shape === c2.shape && c2.shape === c3.shape) score += 2;
-            if (c1.shading === c2.shading && c2.shading === c3.shading) score += 2;
-            if (c1.color === c2.color && c2.color === c3.color) score += 2;
+            if (c1.number === c2.number && c2.number === c3.number) score += 1;
+            if (c1.shape === c2.shape && c2.shape === c3.shape) score += 1;
+            if (c1.shading === c2.shading && c2.shading === c3.shading) score += 1;
+            if (c1.color === c2.color && c2.color === c3.color) score += 1;
             
             return { set, score };
         });
 
         scoredSets.sort((a, b) => b.score - a.score);
-        const topSets = scoredSets.slice(0, Math.min(3, scoredSets.length));
+        const topSets = scoredSets.slice(0, Math.min(5, scoredSets.length));
         
-        const index = Math.floor(Math.abs(skewedNormal(0, 1, -1.5)) * topSets.length);
+        const index = Math.floor(Math.abs(skewedNormal(0, 1, -0.5)) * topSets.length);
         return topSets[Math.min(index, topSets.length - 1)].set;
     }
 
     private selectBestSet(sets: Card[][]): Card[] {
+        if (Math.random() < 0.2) {
+            return sets[Math.floor(Math.random() * sets.length)];
+        }
+        
         const scoredSets = sets.map(set => {
             let score = 0;
             const [c1, c2, c3] = set;
             
-            if (c1.number === c2.number && c2.number === c3.number) score += 2;
-            if (c1.shape === c2.shape && c2.shape === c3.shape) score += 2;
-            if (c1.shading === c2.shading && c2.shading === c3.shading) score += 2;
-            if (c1.color === c2.color && c2.color === c3.color) score += 2;
+            if (c1.number === c2.number && c2.number === c3.number) score += 1.5;
+            if (c1.shape === c2.shape && c2.shape === c3.shape) score += 1.5;
+            if (c1.shading === c2.shading && c2.shading === c3.shading) score += 1.5;
+            if (c1.color === c2.color && c2.color === c3.color) score += 1.5;
             
             return { set, score };
         });
 
         scoredSets.sort((a, b) => b.score - a.score);
-        return scoredSets[0].set;
+        const topThree = scoredSets.slice(0, Math.min(3, scoredSets.length));
+        return topThree[Math.floor(Math.random() * topThree.length)].set;
     }
 
     getDelay(): number {
         const baseDelays = {
-            easy: 4000,
-            medium: 2500,
-            hard: 1500,
+            easy: 6000,
+            medium: 4500,
+            hard: 3500,
         };
         return generateBotDelay(baseDelays[this.difficulty]);
     }

@@ -6,18 +6,13 @@ import { useSocket } from '../hooks/useSocket';
 import { socketService } from '../services/socketService';
 import { useAuthStore } from '../stores/authStore';
 import type { GameState, RoomSettings } from '../types/game';
-import Modal from '../components/Modal';
-import { useModalWithContent } from '../hooks/useModal';
 import ProfileAvatar from '../components/ProfileAvatar';
 import BotAvatar from '../components/BotAvatar';
 import EventChat, { type GameEvent } from '../components/EventChat';
 import GameEndModal from '../components/GameEndModal';
 import { useModal } from '../hooks/useModal';
-
-type Notification = {
-    message: string;
-    type: 'success' | 'error' | 'info';
-};
+import { useToast } from '../hooks/useToast';
+import { ToastContainer } from '../components/Toast';
 
 export default function GameRoomPage() {
     const { roomId } = useParams<{ roomId: string }>();
@@ -28,7 +23,7 @@ export default function GameRoomPage() {
     
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const notificationModal = useModalWithContent<Notification>();
+    const toast = useToast();
     const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
     const [playerNames, setPlayerNames] = useState<Record<string, string>>({});
     const [finalScores, setFinalScores] = useState<Record<string, number> | null>(null);
@@ -130,10 +125,7 @@ export default function GameRoomPage() {
                         playerId: data.playerId,
                         playerName: data.playerUsername,
                     });
-                    notificationModal.open({
-                        message: `${data.playerUsername} found a SET!`,
-                        type: 'info',
-                    });
+                    toast.showToast(`${data.playerUsername} found a SET!`, 'info');
                 }
             },
             onPlayerJoined: (data) => {
@@ -147,10 +139,7 @@ export default function GameRoomPage() {
                     playerId: data.playerId,
                     playerName: data.username,
                 });
-                notificationModal.open({
-                    message: `${data.username} joined the game`,
-                    type: 'info',
-                });
+                toast.showToast(`${data.username} joined the game`, 'info');
             },
             onPlayerLeft: (data) => {
                 addEvent({
@@ -159,10 +148,7 @@ export default function GameRoomPage() {
                     playerId: data.playerId,
                     playerName: data.username,
                 });
-                notificationModal.open({
-                    message: `${data.username} left the game`,
-                    type: 'info',
-                });
+                toast.showToast(`${data.username} left the game`, 'info');
             },
             onGameEnded: (data) => {
                 setFinalScores(data.scores);
@@ -189,21 +175,15 @@ export default function GameRoomPage() {
                     type: 'error',
                     message: error.message,
                 });
-                notificationModal.open({
-                    message: error.message,
-                    type: 'error',
-                });
+                toast.showToast(error.message, 'error');
                 setIsProcessing(false);
             },
         });
-    }, [user, notificationModal, addEvent, playerNames]);
+    }, [user, toast, addEvent, playerNames]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {
-            notificationModal.open({
-                message: 'Not connected to server',
-                type: 'error',
-            });
+            toast.showToast('Not connected to server', 'error');
             return;
         }
 
@@ -303,7 +283,9 @@ export default function GameRoomPage() {
                                         timeRemaining < 60 ? 'bg-gold' : 'bg-white'
                                     }`}>
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm uppercase tracking-wider font-semibold text-black">
+                                            <span className={`text-sm uppercase tracking-wider font-semibold ${
+                                                timeRemaining < 30 ? 'text-white' : 'text-black'
+                                            }`}>
                                                 Time Remaining
                                             </span>
                                         </div>
@@ -401,32 +383,7 @@ export default function GameRoomPage() {
                     </div>
                 )}
 
-                {notificationModal.content && notificationModal.content.type !== 'success' && (
-                    <Modal
-                        isOpen={notificationModal.isOpen}
-                        onClose={notificationModal.close}
-                        title={
-                            notificationModal.content.type === 'error' ? 'Error' :
-                            'Notification'
-                        }
-                        type={notificationModal.content.type}
-                    >
-                        <p className="uppercase tracking-wider text-black mb-4">{notificationModal.content.message}</p>
-                        <button
-                            onClick={notificationModal.close}
-                            className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
-                                notificationModal.content.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
-                                'bg-set-purple hover:bg-[#5500AA]'
-                            }`}
-                            style={{
-                                color: '#ffffff',
-                                backgroundColor: notificationModal.content.type === 'error' ? '#CC0000' : '#6600CC'
-                            }}
-                        >
-                            Close
-                        </button>
-                    </Modal>
-                )}
+                <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
 
                 {gameState && finalScores && (
                     <GameEndModal

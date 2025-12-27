@@ -19,8 +19,8 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
-# Install netcat for wait script
-RUN apk add --no-cache netcat-openbsd
+# Install netcat for wait script (update package index first to avoid DNS issues)
+RUN apk update && apk add --no-cache netcat-openbsd
 
 WORKDIR /app
 

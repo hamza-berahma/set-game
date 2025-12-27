@@ -22,7 +22,7 @@ export class GameService {
     async createGame(
         roomId: string,
         playerIds: string[],
-        settings?: { timerDuration?: number; maxPlayers?: number; playWithBots?: boolean }
+        settings?: { timerDuration?: number; maxPlayers?: number; playWithBots?: boolean; isPrivate?: boolean; roomName?: string }
     ): Promise<GameState> {
         const deck = shuffleDeck(generateDeck());
         const board = deck.splice(0, 12);

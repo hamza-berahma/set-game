@@ -6,6 +6,7 @@ import pool from "./config/database";
 import { initializeRedis } from "./config/redis";
 import authRoutes from "./routes/auth";
 import profileRoutes from "./routes/profile";
+import roomsRoutes from "./routes/rooms";
 import { authenticate } from "./middleware/auth";
 import { initializeSocket } from "./socket/socket";
 
@@ -23,6 +24,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api", profileRoutes);
+app.use("/api/rooms", roomsRoutes);
 
 app.get("/health", (req: Request, res: Response) => {
     res.json({

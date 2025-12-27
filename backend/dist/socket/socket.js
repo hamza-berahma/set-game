@@ -99,6 +99,8 @@ function initializeSocket(server) {
                         timerDuration: settings?.timerDuration,
                         maxPlayers: settings?.maxPlayers,
                         playWithBots: settings?.playWithBots,
+                        isPrivate: settings?.isPrivate,
+                        roomName: settings?.roomName,
                     });
                     await gameService.addPlayerToRoom(roomId, user.userId);
                     await eventLogService.logGameStarted(roomId, gameState.matchId || roomId);

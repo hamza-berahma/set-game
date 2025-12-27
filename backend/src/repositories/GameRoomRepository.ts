@@ -112,5 +112,44 @@ export class GameRoomRepository {
             return null;
         }
     }
+
+    async findPublicRooms(): Promise<Array<GameRoom & { player_count: number; room_name?: string }>> {
+        try {
+            const result = await pool.query(
+                `SELECT 
+                    gr.room_id,
+                    gr.room_code,
+                    gr.current_match_id,
+                    gr.created_at,
+                    gr.lobby_settings,
+                    COUNT(rp.user_id) FILTER (WHERE rp.is_active = true) as player_count
+                FROM game_rooms gr
+                LEFT JOIN room_participants rp ON gr.room_id = rp.room_id
+                WHERE (gr.lobby_settings IS NULL 
+                    OR gr.lobby_settings::text = 'null'
+                    OR (gr.lobby_settings->>'isPrivate')::boolean IS NOT TRUE
+                    OR (gr.lobby_settings->>'isPrivate')::boolean = false)
+                GROUP BY gr.room_id
+                HAVING COUNT(rp.user_id) FILTER (WHERE rp.is_active = true) < 
+                    COALESCE((gr.lobby_settings->>'maxPlayers')::integer, 8)
+                ORDER BY gr.created_at DESC
+                LIMIT 20`,
+                []
+            );
+            return result.rows.map(row => {
+                const settings = typeof row.lobby_settings === 'string' 
+                    ? (row.lobby_settings === 'null' ? null : JSON.parse(row.lobby_settings))
+                    : row.lobby_settings;
+                return {
+                    ...row,
+                    lobby_settings: settings || {},
+                    room_name: settings?.roomName || null,
+                };
+            });
+        } catch (err) {
+            console.error("Error in findPublicRooms:", err);
+            return [];
+        }
+    }
 }
 
