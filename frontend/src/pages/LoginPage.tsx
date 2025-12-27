@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
@@ -12,6 +12,10 @@ export default function LoginPage() {
     const login = useAuthStore((state) => state.login);
     const navigate = useNavigate();
     const errorModal = useModalWithContent<string>();
+
+    useEffect(() => {
+        document.title = 'SET Game - Login';
+    }, []);
 
     const handleSubmit = async (e : React.FormEvent) => {
         e.preventDefault();

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { Plus, Users } from 'lucide-react';
@@ -14,6 +14,10 @@ export default function LobbyPage() {
   const [roomId, setRoomId] = useState('');
   const settingsModal = useModal();
   const errorModal = useModalWithContent<string>();
+
+  useEffect(() => {
+    document.title = `SET Game - Lobby${user?.username ? ` (${user.username})` : ''}`;
+  }, [user?.username]);
 
   const handleLogout = () => {
     logout();

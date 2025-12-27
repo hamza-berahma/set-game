@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gamepad, Users, BookOpen } from 'lucide-react';
 import TutorialModal from '../components/TutorialModal';
@@ -6,6 +7,10 @@ import { useModal } from '../hooks/useModal';
 export default function WelcomePage() {
     const navigate = useNavigate();
     const tutorialModal = useModal();
+
+    useEffect(() => {
+        document.title = 'SET Game - Welcome';
+    }, []);
 
     return (
         <div className="min-h-screen bg-beige flex items-center justify-center p-4">

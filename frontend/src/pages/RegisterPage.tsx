@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
@@ -13,6 +13,10 @@ export default function RegisterPage() {
     const register = useAuthStore((state) => state.register);
     const navigate = useNavigate();
     const errorModal = useModalWithContent<string>();
+
+    useEffect(() => {
+        document.title = 'SET Game - Register';
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,7 +61,7 @@ export default function RegisterPage() {
                         />
                     </div>
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium uppercase tracking-wider mb-1">
+                        <label htmlFor="email" className="block text-sm font-medium uppercase tracking-wider mb-1 text-black">
                             Email
                         </label>
                         <input

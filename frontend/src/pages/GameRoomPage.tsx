@@ -33,6 +33,10 @@ export default function GameRoomPage() {
     const roomSettings = (location.state as { settings?: RoomSettings })?.settings;
     const hasJoinedRef = useRef(false);
 
+    useEffect(() => {
+        document.title = `SET Game - Room ${roomId || ''}`;
+    }, [roomId]);
+
     const addEvent = useCallback((event: Omit<GameEvent, 'id' | 'timestamp'>) => {
         setGameEvents((prev) => [
             ...prev,
