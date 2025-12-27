@@ -11,6 +11,8 @@ import { useModalWithContent } from '../hooks/useModal';
 import ProfileAvatar from '../components/ProfileAvatar';
 import BotAvatar from '../components/BotAvatar';
 import EventChat, { type GameEvent } from '../components/EventChat';
+import GameEndModal from '../components/GameEndModal';
+import { useModal } from '../hooks/useModal';
 
 type Notification = {
     message: string;
@@ -29,6 +31,8 @@ export default function GameRoomPage() {
     const notificationModal = useModalWithContent<Notification>();
     const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
     const [playerNames, setPlayerNames] = useState<Record<string, string>>({});
+    const [finalScores, setFinalScores] = useState<Record<string, number> | null>(null);
+    const gameEndModal = useModal();
     
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -172,15 +176,13 @@ export default function GameRoomPage() {
                     type: 'info',
                 });
             },
-            onGameEnded: () => {
+            onGameEnded: (data) => {
+                setFinalScores(data.scores);
                 addEvent({
                     type: 'game_ended',
                     message: 'Game ended!',
                 });
-                notificationModal.open({
-                    message: 'Game ended!',
-                    type: 'info',
-                });
+                gameEndModal.open();
             },
             onError: (error) => {
                 addEvent({
@@ -434,6 +436,18 @@ export default function GameRoomPage() {
                             Close
                         </button>
                     </Modal>
+                )}
+
+                {/* Game End Modal */}
+                {gameState && finalScores && (
+                    <GameEndModal
+                        isOpen={gameEndModal.isOpen}
+                        onClose={gameEndModal.close}
+                        scores={finalScores}
+                        players={gameState.players}
+                        currentUserId={user?.user_id}
+                        playerNames={playerNames}
+                    />
                 )}
             </div>
         </div>

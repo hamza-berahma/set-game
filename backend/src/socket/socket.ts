@@ -62,11 +62,14 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                     // Log game started
                     await eventLogService.logGameStarted(roomId, roomId); // Using roomId as matchId for now
                     
-                    // Add 1-2 bots to new games for better gameplay
-                    const numBots = Math.floor(Math.random() * 2) + 1; // 1 or 2 bots
-                    for (let i = 0; i < numBots; i++) {
-                        const difficulty = ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)] as 'easy' | 'medium' | 'hard';
-                        await botManager.addBotToRoom(roomId, difficulty);
+                    // Add bots only if playWithBots is enabled in settings
+                    const playWithBots = data.settings?.playWithBots ?? true; // Default to true for backward compatibility
+                    if (playWithBots) {
+                        const numBots = Math.floor(Math.random() * 2) + 1; // 1 or 2 bots
+                        for (let i = 0; i < numBots; i++) {
+                            const difficulty = ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)] as 'easy' | 'medium' | 'hard';
+                            await botManager.addBotToRoom(roomId, difficulty);
+                        }
                     }
                 } else if (!gameState.players.includes(user.userId)) {
                     gameState.players.push(user.userId);

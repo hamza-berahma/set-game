@@ -6,6 +6,7 @@ export interface RoomSettings {
     timerDuration: number; // in seconds, 0 means no timer
     isPrivate: boolean;
     roomName: string;
+    playWithBots?: boolean;
 }
 
 interface RoomSettingsModalProps {
@@ -26,6 +27,7 @@ export default function RoomSettingsModal({
         timerDuration: initialSettings.timerDuration || 0,
         isPrivate: initialSettings.isPrivate || false,
         roomName: initialSettings.roomName || '',
+        playWithBots: initialSettings.playWithBots ?? true, // Default to true
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -88,6 +90,20 @@ export default function RoomSettingsModal({
                         <option value={600}>10 Minutes</option>
                         <option value={900}>15 Minutes</option>
                     </select>
+                </div>
+
+                {/* Play with Bots */}
+                <div className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="playWithBots"
+                        checked={settings.playWithBots}
+                        onChange={(e) => setSettings({ ...settings, playWithBots: e.target.checked })}
+                        className="w-5 h-5 border-4 border-black accent-set-purple cursor-pointer"
+                    />
+                    <label htmlFor="playWithBots" className="text-sm font-semibold uppercase tracking-wider text-black cursor-pointer">
+                        Play with Bots
+                    </label>
                 </div>
 
                 {/* Private Room */}

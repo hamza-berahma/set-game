@@ -9,6 +9,11 @@ export interface SocketUser {
 export interface JoinRoomData {
     roomId: string;
     token: string;
+    settings?: {
+        playWithBots?: boolean;
+        maxPlayers?: number;
+        timerDuration?: number;
+    };
 }
 
 export interface SelectCardsData {

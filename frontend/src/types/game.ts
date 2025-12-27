@@ -27,4 +27,5 @@ export interface RoomSettings {
     timerDuration: number; // in seconds, 0 means no timer
     isPrivate: boolean;
     roomName?: string;
+    playWithBots?: boolean;
 }

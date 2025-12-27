@@ -79,12 +79,12 @@ export class SocketService {
         this.setupEventListeners();
     }
 
-    joinRoom(roomId: string) {
+    joinRoom(roomId: string, settings?: { playWithBots?: boolean; maxPlayers?: number; timerDuration?: number }) {
         if (!this.socket) {
             console.error('Socket not connected');
             return;
         }
-        this.socket.emit('join-room', { roomId });
+        this.socket.emit('join-room', { roomId, settings });
     }
 
     leaveRoom() {
