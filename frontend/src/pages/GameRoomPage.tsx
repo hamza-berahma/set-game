@@ -28,6 +28,7 @@ export default function GameRoomPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const notificationModal = useModalWithContent<Notification>();
     const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
+    const [playerNames, setPlayerNames] = useState<Record<string, string>>({});
     
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -135,6 +136,10 @@ export default function GameRoomPage() {
                 }
             },
             onPlayerJoined: (data) => {
+                setPlayerNames(prev => ({
+                    ...prev,
+                    [data.playerId]: data.username,
+                }));
                 addEvent({
                     type: 'player_joined',
                     message: `${data.username} joined the game`,
@@ -314,6 +319,7 @@ export default function GameRoomPage() {
                                     {gameState.players.map((playerId) => {
                                         const isBot = playerId.startsWith('bot-');
                                         const isCurrentUser = playerId === user?.user_id;
+                                        const playerName = playerNames[playerId] || (isBot ? 'Bot' : `Player ${playerId.slice(0, 8)}`);
                                         
                                         return (
                                             <div
@@ -330,7 +336,7 @@ export default function GameRoomPage() {
                                                     {isBot ? (
                                                         <BotAvatar 
                                                             botId={playerId}
-                                                            botName={playerId.split('-')[2] || 'Bot'}
+                                                            botName={playerName}
                                                             size="medium"
                                                         />
                                                     ) : (
@@ -340,7 +346,7 @@ export default function GameRoomPage() {
                                                         />
                                                     )}
                                                     <span className="text-sm uppercase tracking-wider font-semibold text-black">
-                                                        {isCurrentUser ? 'You' : isBot ? `Bot ${playerId.split('-')[2]?.slice(0, 4) || ''}` : `Player ${playerId.slice(0, 8)}`}
+                                                        {isCurrentUser ? 'You' : playerName}
                                                     </span>
                                                 </div>
                                                 <div className="text-2xl font-bold text-black">
@@ -372,7 +378,7 @@ export default function GameRoomPage() {
                                             {playerId.startsWith('bot-') ? (
                                                 <BotAvatar 
                                                     botId={playerId}
-                                                    botName={playerId.split('-')[2] || 'Bot'}
+                                                    botName={playerNames[playerId] || 'Bot'}
                                                     size="medium"
                                                 />
                                             ) : (
@@ -383,7 +389,7 @@ export default function GameRoomPage() {
                                             )}
                                             <span>
                                                 {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
-                                                {playerId === user?.user_id ? 'You' : playerId.startsWith('bot-') ? `Bot ${playerId.split('-')[2]?.slice(0, 4) || ''}` : `Player ${playerId.slice(0, 8)}`}
+                                                {playerId === user?.user_id ? 'You' : playerNames[playerId] || `Player ${playerId.slice(0, 8)}`}
                                             </span>
                                         </div>
                                         <span className="text-xl font-bold text-black">{score}</span>
