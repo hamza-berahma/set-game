@@ -34,7 +34,7 @@ This will start:
 - Frontend web application
 
 Access the application at:
-- **Frontend**: http://localhost:80
+- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
 - **Health Check**: http://localhost:5000/health
 
