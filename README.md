@@ -1,7 +1,7 @@
 # SET Game
 
 A multiplayer implementation of the SET card game with real-time gameplay.
-
+![Image of the demo](index.png)
 ## Features
 
 - Real-time multiplayer gameplay via WebSockets
