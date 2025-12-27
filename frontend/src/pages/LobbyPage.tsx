@@ -21,8 +21,6 @@ export default function LobbyPage() {
   };
 
   const handleCreateRoom = (settings: RoomSettings) => {
-    // TODO: Send settings to backend API to create room
-    // For now, generate room ID and navigate with settings in URL params or state
     const newRoomId = `room-${Math.random().toString(36).substring(2, 9)}`;
     navigate(`/game/${newRoomId}`, {
       state: { settings }
@@ -117,18 +115,28 @@ export default function LobbyPage() {
       {/* Error Modal */}
       <Modal
         isOpen={errorModal.isOpen}
-        onClose={errorModal.close}
+        onClose={() => {
+          errorModal.close();
+          setErrorMessage("");
+        }}
         title="Error"
         type="error"
       >
-        <p className="uppercase tracking-wider text-black">{errorMessage}</p>
-        <button
-          onClick={errorModal.close}
-          className="mt-4 w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
-          style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
-        >
-          Close
-        </button>
+        {errorMessage && (
+          <>
+            <p className="uppercase tracking-wider text-black">{errorMessage}</p>
+            <button
+              onClick={() => {
+                errorModal.close();
+                setErrorMessage("");
+              }}
+              className="mt-4 w-full px-6 py-3 bg-set-red hover:bg-[#AA0000] border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white"
+              style={{ color: '#ffffff', backgroundColor: '#CC0000' }}
+            >
+              Close
+            </button>
+          </>
+        )}
       </Modal>
     </div>
   );

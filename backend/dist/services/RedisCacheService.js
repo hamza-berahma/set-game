@@ -16,7 +16,7 @@ class RedisCacheService {
         try {
             const client = (0, redis_1.getRedisClient)();
             if (!client || !(0, redis_1.isRedisConnected)()) {
-                console.warn("Redis not available, game state not cached");
+                // Don't spam logs - Redis connection warning is already handled in redis.ts
                 return false;
             }
             const key = `${GAME_STATE_PREFIX}${roomId}`;
@@ -28,11 +28,11 @@ class RedisCacheService {
                 return value;
             });
             await client.setex(key, GAME_STATE_TTL, serialized);
-            console.log(`Game state cached for room ${roomId}`);
+            // Only log successful cache operations in debug mode, not in normal operation
             return true;
         }
         catch (error) {
-            console.error(`Error saving game state to Redis for room ${roomId}:`, error);
+            // Errors are already handled by the connection layer, just return false
             return false;
         }
     }
@@ -43,7 +43,7 @@ class RedisCacheService {
         try {
             const client = (0, redis_1.getRedisClient)();
             if (!client || !(0, redis_1.isRedisConnected)()) {
-                console.warn("Redis not available, returning null");
+                // Silently return null - Redis unavailable is already logged
                 return null;
             }
             const key = `${GAME_STATE_PREFIX}${roomId}`;
@@ -58,7 +58,7 @@ class RedisCacheService {
             return gameState;
         }
         catch (error) {
-            console.error(`Error retrieving game state from Redis for room ${roomId}:`, error);
+            // Errors are already handled by the connection layer
             return null;
         }
     }
@@ -69,16 +69,16 @@ class RedisCacheService {
         try {
             const client = (0, redis_1.getRedisClient)();
             if (!client || !(0, redis_1.isRedisConnected)()) {
-                console.warn("Redis not available, cannot delete");
+                // Silently return false - Redis unavailable is already logged
                 return false;
             }
             const key = `${GAME_STATE_PREFIX}${roomId}`;
             await client.del(key);
-            console.log(`Game state deleted from cache for room ${roomId}`);
+            // Don't log successful deletions in normal operation
             return true;
         }
         catch (error) {
-            console.error(`Error deleting game state from Redis for room ${roomId}:`, error);
+            // Errors are already handled by the connection layer
             return false;
         }
     }

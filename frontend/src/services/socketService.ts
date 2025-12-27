@@ -42,7 +42,6 @@ export class SocketService {
     private setupEventListeners() {
         if (!this.socket) return;
 
-        // Remove existing listeners to prevent duplicates
         this.socket.off('game:state:update');
         this.socket.off('set:found');
         this.socket.off('player:joined');
@@ -50,7 +49,6 @@ export class SocketService {
         this.socket.off('game:ended');
         this.socket.off('error');
 
-        // Add new listeners
         this.socket.on('game:state:update', (data: GameState) => {
             this.handlers.onGameStateUpdate?.(data);
         });
