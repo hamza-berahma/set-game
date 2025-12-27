@@ -81,6 +81,22 @@ sudo docker-compose -f infrastructure/docker-compose.yml down
 sudo docker-compose -f infrastructure/docker-compose.yml down -v
 ```
 
+### Fix container name conflicts
+
+If you get an error about container names already being in use:
+
+```bash
+# Option 1: Use docker-compose down (recommended)
+sudo docker-compose -f infrastructure/docker-compose.yml down
+
+# Option 2: Manually remove containers
+sudo docker stop setgame-db setgame-redis setgame-backend setgame-frontend
+sudo docker rm setgame-db setgame-redis setgame-backend setgame-frontend
+
+# Option 3: Use cleanup script
+./infrastructure/cleanup.sh
+```
+
 ### View logs
 
 ```bash
