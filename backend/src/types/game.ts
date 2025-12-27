@@ -13,6 +13,7 @@ export interface Card {
 
 export interface GameState {
     roomId: string;
+    matchId?: string; // Database match_id (UUID)
     status: "waiting" | "active" | "finished";
     deck: Card[];
     board: Card[];
@@ -20,6 +21,7 @@ export interface GameState {
     players: string[];
     createdAt: Date;
     updatedAt: Date;
+    sequenceNumber?: number; // For game state persistence
 }
 
 export interface CardSelectionResult {

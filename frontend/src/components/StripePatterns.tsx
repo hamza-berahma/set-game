@@ -1,18 +1,6 @@
-/**
- * Global stripe patterns for SET game cards
- * 
- * These patterns are defined globally and referenced by all Card components
- * to avoid duplication and improve performance. Pattern IDs:
- * - stripes-c0: Red (#CC0000)
- * - stripes-c1: Green (#00AA00)
- * - stripes-c2: Purple (#6600CC)
- * 
- * These patterns are used for the "striped" shading variant of cards.
- */
 export const StripePatterns = () => (
     <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>
-            {/* Red stripes - c0 */}
             <pattern
                 id="stripes-c0"
                 x="0"
@@ -33,7 +21,6 @@ export const StripePatterns = () => (
                 <line x1="9.8" y1="0" x2="9.8" y2="8" />
             </pattern>
 
-            {/* Green stripes - c1 */}
             <pattern
                 id="stripes-c1"
                 x="0"
@@ -54,7 +41,6 @@ export const StripePatterns = () => (
                 <line x1="9.8" y1="0" x2="9.8" y2="8" />
             </pattern>
 
-            {/* Purple stripes - c2 */}
             <pattern
                 id="stripes-c2"
                 x="0"

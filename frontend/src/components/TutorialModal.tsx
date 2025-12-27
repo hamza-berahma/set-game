@@ -8,7 +8,6 @@ interface TutorialModalProps {
     onClose: () => void;
 }
 
-// Example cards for tutorial
 const validSetExample: CardType[] = [
     { id: '1', number: 1, shape: 'diamond', shading: 'solid', color: 'red' },
     { id: '2', number: 2, shape: 'diamond', shading: 'solid', color: 'red' },
@@ -190,10 +189,9 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
             type="white"
             closeOnBackdrop={false}
         >
-            <div className="space-y-6">
+            <div className="space-y-6"            >
                 {currentStepData.content}
 
-                {/* Navigation */}
                 <div className="flex items-center justify-between pt-4 border-t-4 border-black">
                     <button
                         onClick={() => setCurrentStep(currentStep - 1)}

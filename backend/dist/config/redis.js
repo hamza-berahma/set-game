@@ -10,28 +10,23 @@ exports.closeRedis = closeRedis;
 const ioredis_1 = __importDefault(require("ioredis"));
 let redisClient = null;
 let isRedisAvailable = false;
-let hasLoggedConnectionWarning = false; // Track if we've already logged the connection warning
-/**
- * Initialize Redis connection
- * Falls back gracefully if Redis is not available
- */
+let hasLoggedConnectionWarning = false;
 function initializeRedis() {
     try {
         const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
         redisClient = new ioredis_1.default(redisUrl, {
             retryStrategy: () => {
-                // Don't retry - fail fast to avoid AggregateError
                 return null;
             },
-            maxRetriesPerRequest: null, // Disable request retries
-            enableReadyCheck: false, // Disable ready check to avoid extra connection attempts
-            connectTimeout: 2000, // Short timeout
-            lazyConnect: false, // Connect immediately but fail fast
-            enableOfflineQueue: false, // Don't queue commands when offline
+            maxRetriesPerRequest: null,
+            enableReadyCheck: false,
+            connectTimeout: 2000,
+            lazyConnect: false,
+            enableOfflineQueue: false,
         });
         redisClient.on("connect", () => {
             console.log("Redis client connecting...");
-            hasLoggedConnectionWarning = false; // Reset on successful connection
+            hasLoggedConnectionWarning = false;
         });
         redisClient.on("ready", () => {
             isRedisAvailable = true;
@@ -39,11 +34,9 @@ function initializeRedis() {
             console.log("Redis client ready");
         });
         redisClient.on("error", (err) => {
-            // Suppress all connection-related errors after first warning
             if (!hasLoggedConnectionWarning) {
                 const errMsg = err?.message || String(err) || "";
                 const errName = err?.name || "";
-                // Handle AggregateError (multiple connection failures)
                 if (errName === "AggregateError" || errMsg === "AggregateError") {
                     console.warn("Redis not available - falling back to in-memory storage. To use Redis: sudo docker-compose -f infrastructure/docker-compose.yml up -d redis");
                 }
@@ -56,19 +49,15 @@ function initializeRedis() {
                     console.warn("Redis not available - falling back to in-memory storage. To use Redis: sudo docker-compose -f infrastructure/docker-compose.yml up -d redis");
                 }
                 else {
-                    // Log unexpected errors (but only once)
                     console.error("Redis error:", errMsg || errName);
                 }
                 hasLoggedConnectionWarning = true;
             }
-            // Silently handle subsequent errors
             isRedisAvailable = false;
         });
         redisClient.on("close", () => {
-            // Don't log close events - they're normal when Redis isn't running
             isRedisAvailable = false;
         });
-        // Suppress the default error handler that might log to console
         redisClient.on("end", () => {
             isRedisAvailable = false;
         });
@@ -83,25 +72,15 @@ function initializeRedis() {
         return null;
     }
 }
-/**
- * Get Redis client instance
- */
 function getRedisClient() {
     return redisClient;
 }
-/**
- * Check if Redis is available
- */
 function isRedisConnected() {
     if (!redisClient) {
         return false;
     }
-    // Check both our flag and the client status
     return isRedisAvailable && (redisClient.status === "ready" || redisClient.status === "connect");
 }
-/**
- * Close Redis connection gracefully
- */
 async function closeRedis() {
     if (redisClient) {
         await redisClient.quit();

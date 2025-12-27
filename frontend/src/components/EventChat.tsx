@@ -1,10 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-/**
- * Event Chat Component
- * Displays game events in a chat-like interface
- */
-
 export interface GameEvent {
     id: string;
     timestamp: Date;
@@ -22,7 +17,6 @@ interface EventChatProps {
 export default function EventChat({ events, currentUserId }: EventChatProps) {
     const chatRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll to bottom when new events arrive
     useEffect(() => {
         if (chatRef.current) {
             chatRef.current.scrollTop = chatRef.current.scrollHeight;

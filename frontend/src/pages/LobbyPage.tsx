@@ -44,7 +44,6 @@ export default function LobbyPage() {
     <div className="min-h-screen bg-beige p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white border-8 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-          {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               {user?.user_id && (
@@ -69,7 +68,6 @@ export default function LobbyPage() {
           </div>
           
           <div className="space-y-6">
-            {/* Create New Room */}
             <div className="bg-white border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <h2 className="text-xl uppercase tracking-wider mb-4 text-black">Create New Game</h2>
               <p className="text-gray-600 mb-4 uppercase text-sm tracking-wider text-black">
@@ -85,7 +83,6 @@ export default function LobbyPage() {
               </button>
             </div>
 
-            {/* Join Existing Room */}
             <div className="bg-white border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <h2 className="text-xl uppercase tracking-wider mb-4 text-black">Join Existing Game</h2>
               <p className="text-gray-600 mb-4 uppercase text-sm tracking-wider text-black">
@@ -117,14 +114,12 @@ export default function LobbyPage() {
         </div>
       </div>
 
-      {/* Room Settings Modal */}
       <RoomSettingsModal
         isOpen={settingsModal.isOpen}
         onClose={settingsModal.close}
         onSave={handleCreateRoom}
       />
 
-      {/* Error Modal */}
       {errorModal.content && (
         <Modal
           isOpen={errorModal.isOpen}

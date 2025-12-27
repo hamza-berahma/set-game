@@ -39,7 +39,6 @@ export default function RoomSettingsModal({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Room Settings" type="white">
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Room Name */}
                 <div>
                     <label className="block text-sm font-semibold uppercase tracking-wider mb-2 text-black">
                         Room Name (Optional)
@@ -54,7 +53,6 @@ export default function RoomSettingsModal({
                     />
                 </div>
 
-                {/* Max Players */}
                 <div>
                     <label className="block text-sm font-semibold uppercase tracking-wider mb-2 text-black">
                         Max Players
@@ -72,7 +70,6 @@ export default function RoomSettingsModal({
                     </select>
                 </div>
 
-                {/* Timer Duration */}
                 <div>
                     <label className="block text-sm font-semibold uppercase tracking-wider mb-2 text-black">
                         Timer Duration
@@ -92,7 +89,6 @@ export default function RoomSettingsModal({
                     </select>
                 </div>
 
-                {/* Play with Bots */}
                 <div className="flex items-center gap-3">
                     <input
                         type="checkbox"
@@ -106,7 +102,6 @@ export default function RoomSettingsModal({
                     </label>
                 </div>
 
-                {/* Private Room */}
                 <div className="flex items-center gap-3">
                     <input
                         type="checkbox"
@@ -120,7 +115,6 @@ export default function RoomSettingsModal({
                     </label>
                 </div>
 
-                {/* Buttons */}
                 <div className="flex gap-3 pt-4">
                     <button
                         type="button"

@@ -27,17 +27,14 @@ export default function Modal({
     const firstFocusableRef = useRef<HTMLElement | null>(null);
     const lastFocusableRef = useRef<HTMLElement | null>(null);
 
-    // Body scroll lock
     useEffect(() => {
         if (isOpen) {
-            // Store current scroll position
             const scrollY = window.scrollY;
             document.body.style.position = 'fixed';
             document.body.style.top = `-${scrollY}px`;
             document.body.style.width = '100%';
             
             return () => {
-                // Restore scroll position
                 document.body.style.position = '';
                 document.body.style.top = '';
                 document.body.style.width = '';
@@ -46,7 +43,6 @@ export default function Modal({
         }
     }, [isOpen]);
 
-    // Escape key handler
     useEffect(() => {
         if (!isOpen || !closeOnEscape) return;
 
@@ -60,13 +56,10 @@ export default function Modal({
         return () => window.removeEventListener('keydown', handleEscape);
     }, [isOpen, closeOnEscape, onClose]);
 
-    // Focus management
     useEffect(() => {
         if (isOpen) {
-            // Store the element that had focus before opening
             previousActiveElement.current = document.activeElement as HTMLElement;
             
-            // Find all focusable elements in modal
             const modal = modalRef.current;
             if (modal) {
                 const focusableElements = modal.querySelectorAll<HTMLElement>(
@@ -77,14 +70,12 @@ export default function Modal({
                     firstFocusableRef.current = focusableElements[0];
                     lastFocusableRef.current = focusableElements[focusableElements.length - 1];
                     
-                    // Focus first element after a brief delay for animation
                     setTimeout(() => {
                         firstFocusableRef.current?.focus();
                     }, 100);
                 }
             }
         } else {
-            // Restore focus when closing
             if (previousActiveElement.current) {
                 previousActiveElement.current.focus();
                 previousActiveElement.current = null;
@@ -92,7 +83,6 @@ export default function Modal({
         }
     }, [isOpen]);
 
-    // Focus trap - keep focus within modal
     useEffect(() => {
         if (!isOpen) return;
 
@@ -114,13 +104,11 @@ export default function Modal({
             const lastElement = focusableElements[focusableElements.length - 1];
 
             if (e.shiftKey) {
-                // Shift + Tab
                 if (document.activeElement === firstElement) {
                     e.preventDefault();
                     lastElement.focus();
                 }
             } else {
-                // Tab
                 if (document.activeElement === lastElement) {
                     e.preventDefault();
                     firstElement.focus();
@@ -132,18 +120,15 @@ export default function Modal({
         return () => window.removeEventListener('keydown', handleTabKey);
     }, [isOpen]);
 
-    // Animation state
     useEffect(() => {
         if (isOpen) {
             setIsAnimating(true);
         } else {
-            // Delay unmounting to allow exit animation
             const timer = setTimeout(() => setIsAnimating(false), 200);
             return () => clearTimeout(timer);
         }
     }, [isOpen]);
 
-    // Don't render if not open and not animating
     if (!isOpen && !isAnimating) return null;
 
     const bgColor = {
@@ -167,7 +152,6 @@ export default function Modal({
             data-state={isOpen ? 'open' : 'closing'}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
-            {/* Backdrop - dimmed, no blur */}
             <div
                 className={`absolute inset-0 bg-black transition-opacity duration-200 ${
                     isOpen ? 'opacity-50' : 'opacity-0'
@@ -175,7 +159,6 @@ export default function Modal({
                 onClick={closeOnBackdrop ? onClose : undefined}
             />
 
-            {/* Modal Content */}
             <div
                 ref={contentRef}
                 className={`${bgColor} border-8 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] max-w-md w-full relative transition-all duration-200 ${
@@ -185,7 +168,6 @@ export default function Modal({
                 }`}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Close button */}
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 p-2 bg-white border-4 border-black hover:bg-gold transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gold z-10"
@@ -195,9 +177,7 @@ export default function Modal({
                     <X className="w-5 h-5 text-black" />
                 </button>
 
-                {/* White background content area */}
                 <div className="bg-white p-6">
-                    {/* Title */}
                     {title && (
                         <h2 
                             id={titleId}
@@ -207,7 +187,6 @@ export default function Modal({
                         </h2>
                     )}
 
-                    {/* Content */}
                     <div id={contentId} className="text-black">
                         {children}
                     </div>

@@ -1,8 +1,3 @@
-/**
- * Pixel Art Profile Avatar Component
- * Generates a minimal pixel art avatar based on user ID/username
- */
-
 interface ProfileAvatarProps {
     userId: string;
     username?: string;
@@ -20,15 +15,13 @@ const colors = ['#CC0000', '#00AA00', '#6600CC']; // set-red, set-green, set-pur
 
 export default function ProfileAvatar({ userId, username, size = 'medium', className = '' }: ProfileAvatarProps) {
     const pixelSize = sizeMap[size];
-    const gridSize = 8; // 8x8 pixel grid
+    const gridSize = 8;
     
-    // Generate deterministic colors based on userId
     const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const primaryColor = colors[hash % colors.length];
     const secondaryColor = colors[(hash + 1) % colors.length];
     const accentColor = colors[(hash + 2) % colors.length];
     
-    // Generate pixel pattern based on hash
     const pixels: boolean[][] = [];
     for (let y = 0; y < gridSize; y++) {
         pixels[y] = [];
@@ -52,10 +45,8 @@ export default function ProfileAvatar({ userId, username, size = 'medium', class
                 viewBox={`0 0 ${pixelSize} ${pixelSize}`}
                 style={{ imageRendering: 'pixelated' }}
             >
-                {/* Background */}
                 <rect width={pixelSize} height={pixelSize} fill={primaryColor} />
                 
-                {/* Pixel pattern */}
                 {pixels.map((row, y) =>
                     row.map((filled, x) => {
                         if (!filled) return null;
@@ -73,7 +64,6 @@ export default function ProfileAvatar({ userId, username, size = 'medium', class
                     })
                 )}
                 
-                {/* Border */}
                 <rect 
                     width={pixelSize} 
                     height={pixelSize} 

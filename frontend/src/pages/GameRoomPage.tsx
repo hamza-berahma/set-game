@@ -35,12 +35,17 @@ export default function GameRoomPage() {
     const gameEndModal = useModal();
     
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-    const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const roomSettings = (location.state as { settings?: RoomSettings })?.settings;
     const hasJoinedRef = useRef(false);
+    const lastRoomIdRef = useRef<string | null>(null);
 
     useEffect(() => {
         document.title = `SET Game - Room ${roomId || ''}`;
+        
+        const storedRoomId = sessionStorage.getItem('lastRoomId');
+        if (storedRoomId && storedRoomId !== roomId) {
+            sessionStorage.removeItem('lastRoomId');
+        }
     }, [roomId]);
 
     const addEvent = useCallback((event: Omit<GameEvent, 'id' | 'timestamp'>) => {
@@ -65,6 +70,9 @@ export default function GameRoomPage() {
 
     useEffect(() => {
         if (socket && isConnected && roomId && !hasJoinedRef.current) {
+            lastRoomIdRef.current = roomId;
+            sessionStorage.setItem('lastRoomId', roomId);
+            
             socketService.joinRoom(roomId, {
                 playWithBots: roomSettings?.playWithBots ?? true,
                 maxPlayers: roomSettings?.maxPlayers,
@@ -85,41 +93,19 @@ export default function GameRoomPage() {
     }, [socket, isConnected, roomId, addEvent, roomSettings]);
 
     useEffect(() => {
-        if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && gameState?.status === 'active') {
-            setTimeRemaining(roomSettings.timerDuration);
-            
-            timerIntervalRef.current = setInterval(() => {
-                setTimeRemaining((prev) => {
-                    if (prev === null || prev <= 1) {
-                        if (timerIntervalRef.current) {
-                            clearInterval(timerIntervalRef.current);
-                        }
-                        // Timer ended - could emit event to backend
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            
-            return () => {
-                if (timerIntervalRef.current) {
-                    clearInterval(timerIntervalRef.current);
-                }
-            };
-        } else {
-            if (timerIntervalRef.current) {
-                clearInterval(timerIntervalRef.current);
+        if (socket && isConnected && !hasJoinedRef.current) {
+            const storedRoomId = sessionStorage.getItem('lastRoomId');
+            if (storedRoomId && storedRoomId === roomId) {
+                socketService.reconnect(storedRoomId);
             }
-            setTimeRemaining(null);
         }
-    }, [roomSettings?.timerDuration, gameState?.status]);
+    }, [socket, isConnected, roomId]);
 
     useEffect(() => {
         socketService.setHandlers({
             onGameStateUpdate: (state: GameState) => {
                 setGameState(state);
                 setIsProcessing(false);
-                // Track player names for bots
                 state.players.forEach(playerId => {
                     if (!playerNames[playerId] && playerId !== user?.user_id && playerId.startsWith('bot-')) {
                         setPlayerNames(prev => ({
@@ -130,7 +116,6 @@ export default function GameRoomPage() {
                 });
             },
             onSetFound: (data) => {
-                // Add to event chat
                 if (data.playerId === user?.user_id) {
                     addEvent({
                         type: 'set_found',
@@ -145,7 +130,6 @@ export default function GameRoomPage() {
                         playerId: data.playerId,
                         playerName: data.playerUsername,
                     });
-                    // Only show info modal for other players' achievements
                     notificationModal.open({
                         message: `${data.playerUsername} found a SET!`,
                         type: 'info',
@@ -188,6 +172,18 @@ export default function GameRoomPage() {
                 });
                 gameEndModal.open();
             },
+            onTimerStart: () => {
+            },
+            onTimerUpdate: (data) => {
+                setTimeRemaining(data.remaining);
+            },
+            onTimerEnd: () => {
+                setTimeRemaining(0);
+                addEvent({
+                    type: 'game_ended',
+                    message: 'Time\'s up!',
+                });
+            },
             onError: (error) => {
                 addEvent({
                     type: 'error',
@@ -228,7 +224,6 @@ export default function GameRoomPage() {
         navigate('/lobby');
     };
 
-    // Display connection status
     if (!isConnected) {
         return (
             <div className="min-h-screen bg-beige p-8 flex items-center justify-center">
@@ -249,7 +244,6 @@ export default function GameRoomPage() {
     return (
         <div className="min-h-screen bg-beige p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="mb-6">
                     <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4">
                         <div className="flex items-center justify-between mb-2">
@@ -285,9 +279,7 @@ export default function GameRoomPage() {
                     </div>
                 </div>
 
-                {/* Main Game Layout */}
                 <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-                    {/* Game Board */}
                     <div className="space-y-6">
                         <GameBoard
                             cards={cards}
@@ -295,17 +287,14 @@ export default function GameRoomPage() {
                             isProcessing={isProcessing}
                         />
                         
-                        {/* Event Chat */}
                         <EventChat 
                             events={gameEvents} 
                             currentUserId={user?.user_id}
                         />
                     </div>
 
-                    {/* Player Scores Sidebar */}
                     {gameState && gameState.players.length > 0 && (
                         <div>
-                            {/* Timer Display */}
                             {timeRemaining !== null && (
                                 <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
                                     <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Timer</h3>
@@ -327,7 +316,6 @@ export default function GameRoomPage() {
                                 </div>
                             )}
 
-                            {/* Players */}
                             <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
                                 <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Players</h3>
                                 <div className="space-y-3">
@@ -376,7 +364,6 @@ export default function GameRoomPage() {
                     )}
                 </div>
 
-                {/* Game Ended Message */}
                 {gameState?.status === 'finished' && (
                     <div className="mt-6 bg-white border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center">
                         <h2 className="text-2xl font-bold mb-2 uppercase tracking-wider text-black">Game Finished!</h2>
@@ -414,7 +401,6 @@ export default function GameRoomPage() {
                     </div>
                 )}
 
-                {/* Notification Modal - Only show for error and info, not success */}
                 {notificationModal.content && notificationModal.content.type !== 'success' && (
                     <Modal
                         isOpen={notificationModal.isOpen}
@@ -442,7 +428,6 @@ export default function GameRoomPage() {
                     </Modal>
                 )}
 
-                {/* Game End Modal */}
                 {gameState && finalScores && (
                     <GameEndModal
                         isOpen={gameEndModal.isOpen}

@@ -21,7 +21,6 @@ h1 {
   letter-spacing: 0.1em;
 }
 
-/* Card styling - matches specs */
 .card {
   position: relative;
   width: 64px;
@@ -63,7 +62,6 @@ h1 {
   stroke-width: 0.5;
 }
 
-/* Responsive card sizes and gaps - always 3 rows × 4 columns */
 .card {
   width: 128px;
   height: 176px;

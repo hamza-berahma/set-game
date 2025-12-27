@@ -25,9 +25,6 @@ export class BotManager {
         this.io = io;
     }
 
-    /**
-     * Add a bot to a room
-     */
     async addBotToRoom(roomId: string, difficulty: 'easy' | 'medium' | 'hard' = 'medium'): Promise<string> {
         const botId = `bot-${Date.now()}-${Math.random().toString(36).substring(7)}`;
         const botName = generateBotName(this.bots.size);
@@ -42,7 +39,6 @@ export class BotManager {
 
         this.bots.set(botId, botInstance);
 
-        // Add bot to game state
         const gameState = await this.gameService.getGame(roomId);
         if (gameState) {
             if (!gameState.players.includes(botId)) {
@@ -51,7 +47,6 @@ export class BotManager {
                 await this.gameService.updateGameState(roomId, gameState);
             }
 
-            // Emit player joined event
             if (this.io) {
                 this.io.to(roomId).emit("player:joined", {
                     roomId,
@@ -70,19 +65,14 @@ export class BotManager {
                 });
             }
 
-            // Log bot joined
             await this.eventLogService.logPlayerJoined(roomId, botId, roomId);
 
-            // Start bot AI
             this.startBotAI(botId);
         }
 
         return botId;
     }
 
-    /**
-     * Remove a bot from a room
-     */
     async removeBot(botId: string): Promise<void> {
         const botInstance = this.bots.get(botId);
         if (!botInstance) return;
@@ -120,9 +110,6 @@ export class BotManager {
         this.bots.delete(botId);
     }
 
-    /**
-     * Start bot AI loop
-     */
     private async startBotAI(botId: string): Promise<void> {
         const botInstance = this.bots.get(botId);
         if (!botInstance || !botInstance.isActive) return;
@@ -132,28 +119,31 @@ export class BotManager {
             return;
         }
 
-        // Bot finds a set
         const cardIds = botInstance.bot.findSet(gameState);
         
         if (cardIds && cardIds.length === 3) {
-            // Process bot's move
+            const currentGameState = await this.gameService.getGame(botInstance.roomId);
+            const gameStartTime = currentGameState?.createdAt || new Date();
+            
             const result = await this.gameService.processCardSelection(
                 botInstance.roomId,
                 botId,
-                cardIds
+                cardIds,
+                gameStartTime
             );
 
             if (result.success) {
-                // Log SET found
+                const updatedStateAfterMove = await this.gameService.getGame(botInstance.roomId);
+                const matchId = updatedStateAfterMove?.matchId || botInstance.roomId;
+                
                 await this.eventLogService.logSetFound(
                     botInstance.roomId,
-                    botInstance.roomId,
+                    matchId,
                     botId,
                     cardIds,
                     result.score || 0
                 );
 
-                // Emit events
                 if (this.io) {
                     this.io.to(botInstance.roomId).emit("set:found", {
                         roomId: botInstance.roomId,
@@ -175,9 +165,10 @@ export class BotManager {
                         });
 
                         if (updatedState.status === "finished") {
+                            const matchId = updatedState.matchId || botInstance.roomId;
                             await this.eventLogService.logGameEnded(
                                 botInstance.roomId,
-                                botInstance.roomId,
+                                matchId,
                                 updatedState.scores
                             );
                             
@@ -192,7 +183,6 @@ export class BotManager {
             }
         }
 
-        // Schedule next bot move using skewed normal distribution
         if (botInstance.isActive) {
             const delay = botInstance.bot.getDelay();
             botInstance.timeout = setTimeout(() => {
@@ -201,9 +191,6 @@ export class BotManager {
         }
     }
 
-    /**
-     * Pause all bots in a room
-     */
     pauseBotsInRoom(roomId: string): void {
         this.bots.forEach((botInstance, botId) => {
             if (botInstance.roomId === roomId) {
@@ -216,9 +203,6 @@ export class BotManager {
         });
     }
 
-    /**
-     * Resume all bots in a room
-     */
     resumeBotsInRoom(roomId: string): void {
         this.bots.forEach((botInstance, botId) => {
             if (botInstance.roomId === roomId && !botInstance.isActive) {
@@ -228,9 +212,6 @@ export class BotManager {
         });
     }
 
-    /**
-     * Remove all bots from a room
-     */
     async removeAllBotsFromRoom(roomId: string): Promise<void> {
         const botsToRemove: string[] = [];
         this.bots.forEach((botInstance, botId) => {

@@ -53,7 +53,6 @@ function findValidSets(board) {
         for (let j = i + 1; j < board.length; j++) {
             for (let k = j + 1; k < board.length; k++) {
                 if (isValidSet(board[i], board[j], board[k])) {
-                    // Create sorted ID to avoid duplicates
                     const cardIds = [board[i].id, board[j].id, board[k].id].sort();
                     const setId = cardIds.join('-');
                     if (!seen.has(setId)) {

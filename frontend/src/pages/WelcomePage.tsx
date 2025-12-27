@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Gamepad, Users, BookOpen } from 'lucide-react';
 import TutorialModal from '../components/TutorialModal';
 import { useModal } from '../hooks/useModal';
+import LetterCard from '../components/LetterCard';
 
 export default function WelcomePage() {
     const navigate = useNavigate();
@@ -15,20 +16,17 @@ export default function WelcomePage() {
     return (
         <div className="min-h-screen bg-beige flex items-center justify-center p-4">
             <div className="max-w-md w-full text-center">
-                {/* Logo */}
                 <div className="mb-8 border-8 border-black p-8 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                    <h2 className="text-7xl mb-2 tracking-wider uppercase text-black">SET</h2>
-                    <div className="flex justify-center gap-2 mb-2">
-                        <div className="w-4 h-4 bg-set-red border-2 border-black"></div>
-                        <div className="w-4 h-4 bg-set-green border-2 border-black"></div>
-                        <div className="w-4 h-4 bg-set-purple border-2 border-black"></div>
+                    <div className="flex justify-center items-center gap-4 mb-6">
+                        <LetterCard letter="S" color="red" className="transform hover:scale-105 transition-transform duration-200" />
+                        <LetterCard letter="E" color="green" className="transform hover:scale-105 transition-transform duration-200" />
+                        <LetterCard letter="T" color="purple" className="transform hover:scale-105 transition-transform duration-200" />
                     </div>
                     <p className="uppercase text-sm tracking-widest text-black">
                         The Family Game of Visual Perception
                     </p>
                 </div>
 
-                {/* Main Buttons */}
                 <div className="space-y-4 mb-8">
                     <button
                         onClick={() => navigate('/register')}
@@ -57,7 +55,6 @@ export default function WelcomePage() {
                     </button>
                 </div>
 
-                {/* Tutorial Modal */}
                 <TutorialModal
                     isOpen={tutorialModal.isOpen}
                     onClose={tutorialModal.close}

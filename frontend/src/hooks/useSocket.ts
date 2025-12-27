@@ -9,6 +9,7 @@ export function useSocket() {
     const socketRef = useRef<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const wasConnectedRef = useRef(false);
 
     useEffect(() => {
         if (!token) {
@@ -29,6 +30,16 @@ export function useSocket() {
             console.log("Socket is connected", socket.id);
             setIsConnected(true);
             setError(null);
+            
+            if (wasConnectedRef.current) {
+                const lastRoomId = sessionStorage.getItem('lastRoomId');
+                if (lastRoomId) {
+                    setTimeout(() => {
+                        socket.emit('reconnect', { roomId: lastRoomId });
+                    }, 100);
+                }
+            }
+            wasConnectedRef.current = true;
         });
 
         socket.on("disconnect", (reason) => {

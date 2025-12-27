@@ -6,14 +6,12 @@ interface CardProps {
     onClick?: () => void;
 }
 
-// Color to hex mapping
 const COLOR_MAP: Record<CardType['color'], string> = {
     red: '#CC0000',
     green: '#00AA00',
     purple: '#6600CC',
 } as const;
 
-// Color to pattern ID mapping (patterns defined globally in StripePatterns component)
 const PATTERN_ID_MAP: Record<CardType['color'], string> = {
     red: 'stripes-c0',
     green: 'stripes-c1',
@@ -35,7 +33,6 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
         };
 
         const shapes = [];
-        // Render each shape with proper spacing - shapes are spaced vertically
         for (let i = 0; i < card.number; i++) {
             if (card.shape === 'diamond') {
                 shapes.push(
@@ -69,8 +66,6 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
             <div 
                 className={`card-inner ${isSelected ? 'selected' : ''}`}
             >
-                {/* Render shapes based on number (1, 2, or 3) */}
-                {/* Patterns are defined globally in StripePatterns component */}
                 {renderShape()}
             </div>
         </div>

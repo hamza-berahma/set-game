@@ -6,4 +6,15 @@ module.exports = {
     transform: {
         "^.+\\.ts$": "ts-jest",
     },
+    moduleNameMapper: {
+        "^@/(.*)$": "<rootDir>/src/$1",
+    },
+    collectCoverageFrom: [
+        "src/**/*.ts",
+        "!src/**/*.d.ts",
+        "!src/tests/**",
+        "!src/server.ts",
+    ],
+    coverageDirectory: "coverage",
+    testTimeout: 10000,
 };

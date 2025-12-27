@@ -144,5 +144,63 @@ describe("Game Logic Tests", () => {
             const sets = findValidSets(board);
             expect(sets.length).toBeGreaterThan(0);
         });
+
+        it("should return empty array when no valid SETs exist", () => {
+            const board: Card[] = [
+                { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" },
+                { id: "2", number: 1, shape: "diamond", shading: "solid", color: "red" },
+                { id: "3", number: 2, shape: "diamond", shading: "solid", color: "red" },
+            ];
+            const sets = findValidSets(board);
+            expect(sets.length).toBe(0);
+        });
+
+        it("should not return duplicate SETs", () => {
+            const board: Card[] = [
+                { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" },
+                { id: "2", number: 2, shape: "diamond", shading: "solid", color: "red" },
+                { id: "3", number: 3, shape: "diamond", shading: "solid", color: "red" },
+            ];
+            const sets = findValidSets(board);
+            expect(sets.length).toBe(1);
+        });
+    });
+
+    describe("isValidSet edge cases", () => {
+        it("should reject SET with two same and one different number", () => {
+            const card1: Card = { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card2: Card = { id: "2", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card3: Card = { id: "3", number: 2, shape: "diamond", shading: "solid", color: "red" };
+            expect(isValidSet(card1, card2, card3)).toBe(false);
+        });
+
+        it("should reject SET with two same and one different shape", () => {
+            const card1: Card = { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card2: Card = { id: "2", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card3: Card = { id: "3", number: 1, shape: "oval", shading: "solid", color: "red" };
+            expect(isValidSet(card1, card2, card3)).toBe(false);
+        });
+
+        it("should reject SET with two same and one different shading", () => {
+            const card1: Card = { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card2: Card = { id: "2", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card3: Card = { id: "3", number: 1, shape: "diamond", shading: "striped", color: "red" };
+            expect(isValidSet(card1, card2, card3)).toBe(false);
+        });
+
+        it("should reject SET with two same and one different color", () => {
+            const card1: Card = { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card2: Card = { id: "2", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card3: Card = { id: "3", number: 1, shape: "diamond", shading: "solid", color: "green" };
+            expect(isValidSet(card1, card2, card3)).toBe(false);
+        });
+
+        it("should validate complex valid SET", () => {
+            // All different numbers, all same shape, all different shading, all different color
+            const card1: Card = { id: "1", number: 1, shape: "diamond", shading: "solid", color: "red" };
+            const card2: Card = { id: "2", number: 2, shape: "diamond", shading: "striped", color: "green" };
+            const card3: Card = { id: "3", number: 3, shape: "diamond", shading: "open", color: "purple" };
+            expect(isValidSet(card1, card2, card3)).toBe(true);
+        });
     });
 });

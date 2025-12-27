@@ -89,7 +89,6 @@ export default function LoginPage() {
                 </p>
             </div>
 
-            {/* Error Modal */}
             {errorModal.content && (
                 <Modal
                     isOpen={errorModal.isOpen}

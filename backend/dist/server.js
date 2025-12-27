@@ -46,7 +46,6 @@ app.use((err, req, res, next) => {
         message: err.message,
     });
 });
-// Initialize Redis
 (0, redis_1.initializeRedis)();
 httpServer.listen(PORT, () => {
     console.log(`Server listening at port ${PORT}`);

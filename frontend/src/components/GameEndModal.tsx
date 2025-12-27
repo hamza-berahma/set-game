@@ -19,7 +19,6 @@ export default function GameEndModal({
     currentUserId,
     playerNames,
 }: GameEndModalProps) {
-    // Sort players by score (descending)
     const rankedPlayers = players
         .map(playerId => ({
             playerId,

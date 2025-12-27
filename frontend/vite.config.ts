@@ -8,4 +8,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  // @ts-ignore - Vitest types
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/tests/setup.ts',
+  },
 })
