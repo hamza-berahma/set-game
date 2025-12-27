@@ -7,6 +7,7 @@ import { useAuthStore } from '../stores/authStore';
 import type { GameState, RoomSettings } from '../types/game';
 import Modal from '../components/Modal';
 import { useModalWithContent } from '../hooks/useModal';
+import ProfileAvatar from '../components/ProfileAvatar';
 
 type Notification = {
     message: string;
@@ -84,12 +85,10 @@ export default function GameRoomPage() {
                 setIsProcessing(false);
             },
             onSetFound: (data) => {
-                if (data.playerId === user?.user_id) {
-                    notificationModal.open({
-                        message: `You found a SET! +${data.newScore} points`,
-                        type: 'success',
-                    });
-                } else {
+                // Success notifications don't show modals - just update game state
+                // The score update will be visible in the player list
+                if (data.playerId !== user?.user_id) {
+                    // Only show info modal for other players' achievements
                     notificationModal.open({
                         message: `${data.playerUsername} found a SET!`,
                         type: 'info',
@@ -239,7 +238,11 @@ export default function GameRoomPage() {
                                                     : 'bg-white'
                                             }`}
                                         >
-                                            <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <ProfileAvatar 
+                                                    userId={playerId} 
+                                                    size="medium"
+                                                />
                                                 <span className="text-sm uppercase tracking-wider font-semibold text-black">
                                                     {playerId === user?.user_id ? 'You' : `Player ${playerId.slice(0, 8)}`}
                                                 </span>
@@ -268,10 +271,16 @@ export default function GameRoomPage() {
                                         key={playerId} 
                                         className="flex items-center justify-between bg-beige border-4 border-black p-4 uppercase tracking-wider text-black"
                                     >
-                                        <span>
-                                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
-                                            {playerId === user?.user_id ? 'You' : `Player ${playerId.slice(0, 8)}`}
-                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <ProfileAvatar 
+                                                userId={playerId} 
+                                                size="medium"
+                                            />
+                                            <span>
+                                                {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
+                                                {playerId === user?.user_id ? 'You' : `Player ${playerId.slice(0, 8)}`}
+                                            </span>
+                                        </div>
                                         <span className="text-xl font-bold text-black">{score}</span>
                                     </div>
                                 ))}
@@ -279,13 +288,12 @@ export default function GameRoomPage() {
                     </div>
                 )}
 
-                {/* Notification Modal */}
-                {notificationModal.content && (
+                {/* Notification Modal - Only show for error and info, not success */}
+                {notificationModal.content && notificationModal.content.type !== 'success' && (
                     <Modal
                         isOpen={notificationModal.isOpen}
                         onClose={notificationModal.close}
                         title={
-                            notificationModal.content.type === 'success' ? 'Success' :
                             notificationModal.content.type === 'error' ? 'Error' :
                             'Notification'
                         }
@@ -295,14 +303,12 @@ export default function GameRoomPage() {
                         <button
                             onClick={notificationModal.close}
                             className={`w-full px-6 py-3 border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-white ${
-                                notificationModal.content.type === 'success' ? 'bg-set-green hover:bg-[#008800]' :
                                 notificationModal.content.type === 'error' ? 'bg-set-red hover:bg-[#AA0000]' :
                                 'bg-set-purple hover:bg-[#5500AA]'
                             }`}
                             style={{
                                 color: '#ffffff',
-                                backgroundColor: notificationModal.content.type === 'success' ? '#00AA00' :
-                                    notificationModal.content.type === 'error' ? '#CC0000' : '#6600CC'
+                                backgroundColor: notificationModal.content.type === 'error' ? '#CC0000' : '#6600CC'
                             }}
                         >
                             Close

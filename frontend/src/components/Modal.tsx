@@ -167,17 +167,17 @@ export default function Modal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={closeOnBackdrop ? onClose : undefined}
         >
-            {/* Backdrop */}
+            {/* Backdrop - dimmed, no blur */}
             <div
                 className={`absolute inset-0 bg-black transition-opacity duration-200 ${
-                    isOpen ? 'opacity-10' : 'opacity-0'
-                } backdrop-blur-[2px]`}
+                    isOpen ? 'opacity-50' : 'opacity-0'
+                }`}
             />
 
             {/* Modal Content */}
             <div
                 ref={contentRef}
-                className={`${bgColor} border-8 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] max-w-md w-full p-6 relative transition-all duration-200 ${
+                className={`${bgColor} border-8 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] max-w-md w-full relative transition-all duration-200 ${
                     isOpen 
                         ? 'opacity-100 scale-100' 
                         : 'opacity-0 scale-95'
@@ -187,26 +187,29 @@ export default function Modal({
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 bg-white border-4 border-black hover:bg-gold transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gold"
+                    className="absolute top-4 right-4 p-2 bg-white border-4 border-black hover:bg-gold transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-gold z-10"
                     aria-label="Close modal"
                     type="button"
                 >
                     <X className="w-5 h-5 text-black" />
                 </button>
 
-                {/* Title */}
-                {title && (
-                    <h2 
-                        id={titleId}
-                        className="text-2xl font-bold uppercase tracking-wider mb-4 text-black pr-10"
-                    >
-                        {title}
-                    </h2>
-                )}
+                {/* White background content area */}
+                <div className="bg-white p-6">
+                    {/* Title */}
+                    {title && (
+                        <h2 
+                            id={titleId}
+                            className="text-2xl font-bold uppercase tracking-wider mb-4 text-black pr-10"
+                        >
+                            {title}
+                        </h2>
+                    )}
 
-                {/* Content */}
-                <div id={contentId} className="text-black">
-                    {children}
+                    {/* Content */}
+                    <div id={contentId} className="text-black">
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>
