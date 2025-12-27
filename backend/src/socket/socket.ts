@@ -47,7 +47,8 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
 
         socket.on("join-room", async (data: JoinRoomData) => {
             try {
-                const { roomId } = data;
+                const { roomId, settings } = data;
+                console.log(`User ${user.username} joining room ${roomId} with settings:`, settings);
 
                 if (user.roomId) {
                     socket.leave(user.roomId);
@@ -62,10 +63,12 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                     // Log game started
                     await eventLogService.logGameStarted(roomId, roomId); // Using roomId as matchId for now
                     
-                    // Add bots only if playWithBots is enabled in settings
-                    const playWithBots = data.settings?.playWithBots ?? true; // Default to true for backward compatibility
+                    // Add bots only if playWithBots is enabled in settings (default to true)
+                    const playWithBots = settings?.playWithBots !== false; // Default to true if not specified
+                    console.log(`Play with bots: ${playWithBots} (settings:`, settings, ')');
                     if (playWithBots) {
                         const numBots = Math.floor(Math.random() * 2) + 1; // 1 or 2 bots
+                        console.log(`Adding ${numBots} bot(s) to room ${roomId}`);
                         for (let i = 0; i < numBots; i++) {
                             const difficulty = ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)] as 'easy' | 'medium' | 'hard';
                             await botManager.addBotToRoom(roomId, difficulty);
