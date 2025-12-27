@@ -1,14 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 88">
-  <!-- Card background -->
+  <!-- Card background with border -->
   <rect x="2" y="2" width="60" height="84" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
   
-  <!-- Simple S shape with three colors -->
-  <!-- Top curve - Red -->
-  <path d="M 20 20 Q 32 20, 32 28 Q 32 36, 20 36" fill="#CC0000" stroke="#000000" stroke-width="2"/>
+  <!-- Simple S letter divided into three colored sections -->
+  <!-- Top half - Red -->
+  <path d="M 18 20 C 18 20, 18 30, 32 30 C 46 30, 46 40, 32 40 L 32 44" 
+        fill="#CC0000" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
   
-  <!-- Middle section - Green -->
-  <rect x="20" y="36" width="24" height="16" fill="#00AA00" stroke="#000000" stroke-width="2"/>
+  <!-- Middle - Green -->
+  <rect x="18" y="40" width="28" height="8" fill="#00AA00" stroke="#000000" stroke-width="2.5"/>
   
-  <!-- Bottom curve - Purple -->
-  <path d="M 44 52 Q 32 52, 32 60 Q 32 68, 44 68" fill="#6600CC" stroke="#000000" stroke-width="2"/>
+  <!-- Bottom half - Purple -->
+  <path d="M 32 48 L 32 52 C 46 52, 46 62, 32 62 C 18 62, 18 72, 18 72" 
+        fill="#6600CC" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
 </svg>
