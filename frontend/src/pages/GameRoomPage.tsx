@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import GameBoard from '../components/GameBoard';
@@ -31,8 +31,9 @@ export default function GameRoomPage() {
     const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
     const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const roomSettings = (location.state as { settings?: RoomSettings })?.settings;
+    const hasJoinedRef = useRef(false);
 
-    const addEvent = (event: Omit<GameEvent, 'id' | 'timestamp'>) => {
+    const addEvent = useCallback((event: Omit<GameEvent, 'id' | 'timestamp'>) => {
         setGameEvents((prev) => [
             ...prev,
             {
@@ -41,7 +42,7 @@ export default function GameRoomPage() {
                 timestamp: new Date(),
             },
         ]);
-    };
+    }, []);
 
     useEffect(() => {
         if (socket) {
@@ -53,8 +54,9 @@ export default function GameRoomPage() {
     }, [socket]);
 
     useEffect(() => {
-        if (socket && isConnected && roomId) {
+        if (socket && isConnected && roomId && !hasJoinedRef.current) {
             socketService.joinRoom(roomId);
+            hasJoinedRef.current = true;
             addEvent({
                 type: 'game_started',
                 message: 'Game started!',
@@ -62,6 +64,7 @@ export default function GameRoomPage() {
         }
         return () => {
             if (roomId) {
+                hasJoinedRef.current = false;
                 socketService.leaveRoom();
             }
         };
