@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Gamepad, Users } from 'lucide-react';
+import { Gamepad, Users, BookOpen } from 'lucide-react';
+import TutorialModal from '../components/TutorialModal';
+import { useModal } from '../hooks/useModal';
 
 export default function WelcomePage() {
     const navigate = useNavigate();
+    const tutorialModal = useModal();
 
     return (
         <div className="min-h-screen bg-beige flex items-center justify-center p-4">
@@ -38,7 +41,22 @@ export default function WelcomePage() {
                         <Gamepad className="w-5 h-5" />
                         Login
                     </button>
+
+                    <button
+                        onClick={tutorialModal.open}
+                        className="w-full h-14 bg-set-purple hover:bg-[#5500AA] text-white border-4 border-black uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:scale-105 font-semibold text-lg flex items-center justify-center gap-2"
+                        style={{ color: '#ffffff', backgroundColor: '#6600CC' }}
+                    >
+                        <BookOpen className="w-5 h-5" style={{ stroke: '#ffffff' }} />
+                        How to Play
+                    </button>
                 </div>
+
+                {/* Tutorial Modal */}
+                <TutorialModal
+                    isOpen={tutorialModal.isOpen}
+                    onClose={tutorialModal.close}
+                />
             </div>
         </div>
     );
