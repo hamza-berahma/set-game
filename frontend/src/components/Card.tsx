@@ -6,24 +6,23 @@ interface CardProps {
     onClick?: () => void;
 }
 
+// Color to hex mapping
+const COLOR_MAP: Record<CardType['color'], string> = {
+    red: '#CC0000',
+    green: '#00AA00',
+    purple: '#6600CC',
+} as const;
+
+// Color to pattern ID mapping (patterns defined globally in StripePatterns component)
+const PATTERN_ID_MAP: Record<CardType['color'], string> = {
+    red: 'stripes-c0',
+    green: 'stripes-c1',
+    purple: 'stripes-c2',
+} as const;
+
 export default function Card({ card, isSelected = false, onClick }: CardProps) {
-    // Generate unique pattern IDs per card to avoid SVG conflicts
-    const patternIdRed = `stripes-c0-${card.id}`;
-    const patternIdGreen = `stripes-c1-${card.id}`;
-    const patternIdPurple = `stripes-c2-${card.id}`;
-
     const renderShape = () => {
-        const shapeColor = {
-            red: '#CC0000',
-            green: '#00AA00',
-            purple: '#6600CC',
-        }[card.color];
-
-        const patternIdMap = {
-            red: patternIdRed,
-            green: patternIdGreen,
-            purple: patternIdPurple,
-        };
+        const shapeColor = COLOR_MAP[card.color];
 
         const shapeStyle: React.CSSProperties = {
             stroke: shapeColor,
@@ -31,7 +30,7 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
             fill: card.shading === 'solid' 
                 ? shapeColor 
                 : card.shading === 'striped' 
-                    ? `url(#${patternIdMap[card.color]})` 
+                    ? `url(#${PATTERN_ID_MAP[card.color]})` 
                     : 'transparent',
         };
 
@@ -70,46 +69,8 @@ export default function Card({ card, isSelected = false, onClick }: CardProps) {
             <div 
                 className={`card-inner ${isSelected ? 'selected' : ''}`}
             >
-                {/* Hidden SVG for patterns - defined once per card */}
-                <svg width="0" height="0" style={{ position: 'absolute' }}>
-                    <defs>
-                        <pattern id={patternIdRed} x="0" width="12" height="8" patternUnits="userSpaceOnUse" stroke="#CC0000" strokeWidth="0.3">
-                            <line x1="1" y1="0" x2="1" y2="8"/>
-                            <line x1="2.2" y1="0" x2="2.2" y2="8"/>
-                            <line x1="3.5" y1="0" x2="3.5" y2="8"/>
-                            <line x1="4.8" y1="0" x2="4.8" y2="8"/>
-                            <line x1="6" y1="0" x2="6" y2="8"/>
-                            <line x1="11" y1="0" x2="11" y2="8"/>
-                            <line x1="8.5" y1="0" x2="8.5" y2="8"/>
-                            <line x1="7.2" y1="0" x2="7.2" y2="8"/>
-                            <line x1="9.8" y1="0" x2="9.8" y2="8"/>
-                        </pattern>
-                        <pattern id={patternIdGreen} x="0" width="12" height="8" patternUnits="userSpaceOnUse" stroke="#00AA00" strokeWidth="0.3">
-                            <line x1="1" y1="0" x2="1" y2="8"/>
-                            <line x1="2.2" y1="0" x2="2.2" y2="8"/>
-                            <line x1="3.5" y1="0" x2="3.5" y2="8"/>
-                            <line x1="4.8" y1="0" x2="4.8" y2="8"/>
-                            <line x1="6" y1="0" x2="6" y2="8"/>
-                            <line x1="11" y1="0" x2="11" y2="8"/>
-                            <line x1="8.5" y1="0" x2="8.5" y2="8"/>
-                            <line x1="7.2" y1="0" x2="7.2" y2="8"/>
-                            <line x1="9.8" y1="0" x2="9.8" y2="8"/>
-                        </pattern>
-                        <pattern id={patternIdPurple} x="0" width="12" height="8" patternUnits="userSpaceOnUse" stroke="#6600CC" strokeWidth="0.3">
-                            <line x1="1" y1="0" x2="1" y2="8"/>
-                            <line x1="2.2" y1="0" x2="2.2" y2="8"/>
-                            <line x1="3.5" y1="0" x2="3.5" y2="8"/>
-                            <line x1="4.8" y1="0" x2="4.8" y2="8"/>
-                            <line x1="6" y1="0" x2="6" y2="8"/>
-                            <line x1="11" y1="0" x2="11" y2="8"/>
-                            <line x1="8.5" y1="0" x2="8.5" y2="8"/>
-                            <line x1="7.2" y1="0" x2="7.2" y2="8"/>
-                            <line x1="9.8" y1="0" x2="9.8" y2="8"/>
-                        </pattern>
-                    </defs>
-                </svg>
-
                 {/* Render shapes based on number (1, 2, or 3) */}
+                {/* Patterns are defined globally in StripePatterns component */}
                 {renderShape()}
             </div>
         </div>

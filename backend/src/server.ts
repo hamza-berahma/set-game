@@ -5,6 +5,7 @@ import { createServer } from "http";
 import pool from "./config/database";
 import { initializeRedis } from "./config/redis";
 import authRoutes from "./routes/auth";
+import profileRoutes from "./routes/profile";
 import { authenticate } from "./middleware/auth";
 import { initializeSocket } from "./socket/socket";
 
@@ -13,21 +14,15 @@ const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
 const io = initializeSocket(httpServer);
 
-app.use(cors());
+const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
+app.use(cors({
+    origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim()),
+    credentials: true,
+}));
 app.use(express.json());
-app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-});
 
 app.use("/api/auth", authRoutes);
-
-app.get("/api/profile", authenticate, (req: Request, res: Response) => {
-    res.json({
-        message: "This is a protected route",
-        user: req.user,
-    });
-});
+app.use("/api", profileRoutes);
 
 app.get("/health", (req: Request, res: Response) => {
     res.json({

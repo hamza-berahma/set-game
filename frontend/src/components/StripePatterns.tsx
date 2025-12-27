@@ -1,5 +1,14 @@
-// Global stripe patterns - matches styling guide
-// These patterns must be defined globally so they can be referenced by card SVGs
+/**
+ * Global stripe patterns for SET game cards
+ * 
+ * These patterns are defined globally and referenced by all Card components
+ * to avoid duplication and improve performance. Pattern IDs:
+ * - stripes-c0: Red (#CC0000)
+ * - stripes-c1: Green (#00AA00)
+ * - stripes-c2: Purple (#6600CC)
+ * 
+ * These patterns are used for the "striped" shading variant of cards.
+ */
 export const StripePatterns = () => (
     <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>

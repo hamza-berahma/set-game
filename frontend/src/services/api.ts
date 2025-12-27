@@ -42,4 +42,15 @@ export const authAPI = {
     },
 };
 
+export const profileAPI = {
+    getProfile: async () => {
+        const response = await api.get("/api/profile");
+        return response.data;
+    },
+    updateProfile: async (username: string, profile_picture: string) => {
+        const response = await api.put("/api/profile", { username, profile_picture });
+        return response.data;
+    },
+};
+
 export default api;

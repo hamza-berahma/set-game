@@ -5,10 +5,12 @@ import RegisterPage from "./pages/RegisterPage";
 import LobbyPage from "./pages/LobbyPage";
 import GameRoomPage from "./pages/GameRoomPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { StripePatterns } from "./components/StripePatterns";
 
 function App() {
     return (
         <BrowserRouter>
+            <StripePatterns />
             <Routes>
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/login" element={<LoginPage />} />

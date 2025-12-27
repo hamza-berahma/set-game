@@ -10,25 +10,20 @@ const http_1 = require("http");
 const database_1 = __importDefault(require("./config/database"));
 const redis_1 = require("./config/redis");
 const auth_1 = __importDefault(require("./routes/auth"));
-const auth_2 = require("./middleware/auth");
+const profile_1 = __importDefault(require("./routes/profile"));
 const socket_1 = require("./socket/socket");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 const httpServer = (0, http_1.createServer)(app);
 const io = (0, socket_1.initializeSocket)(httpServer);
-app.use((0, cors_1.default)());
+const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
+app.use((0, cors_1.default)({
+    origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim()),
+    credentials: true,
+}));
 app.use(express_1.default.json());
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-});
 app.use("/api/auth", auth_1.default);
-app.get("/api/profile", auth_2.authenticate, (req, res) => {
-    res.json({
-        message: "This is a protected route",
-        user: req.user,
-    });
-});
+app.use("/api", profile_1.default);
 app.get("/health", (req, res) => {
     res.json({
         status: "ok",

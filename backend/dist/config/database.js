@@ -1,13 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const pg_1 = require("pg");
+const databaseUrl = process.env.DATABASE_URL;
+const poolConfig = databaseUrl
+    ? { connectionString: databaseUrl }
+    : {
+        host: process.env.DB_HOST || "localhost",
+        port: parseInt(process.env.DB_PORT || "5432"),
+        database: process.env.DB_NAME || "setgame",
+        user: process.env.DB_USER || "setgame",
+        password: process.env.DB_PASSWORD || "yourpassword",
+    };
 const pool = new pg_1.Pool({
-    host: "localhost",
-    port: 5432,
-    database: "setgame",
-    user: "setgame",
-    password: "yourpassword",
-    max: 20,
+    ...poolConfig,
+    max: parseInt(process.env.DB_MAX_CONNECTIONS || "20"),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 });
