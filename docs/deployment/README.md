@@ -547,11 +547,70 @@ WHERE datname = 'setgame';
 
 ### Horizontal Scaling
 
-For multiple backend instances:
-- Use sticky sessions for WebSocket connections
-- Shared Redis instance for game state
-- Shared PostgreSQL database
-- Load balancer with WebSocket support
+The application supports horizontal scaling through the Socket.IO Redis adapter.
+
+**Architecture:**
+```mermaid
+graph TB
+    subgraph LoadBalancer[Load Balancer]
+        LB[Nginx]
+    end
+    
+    subgraph BackendInstances[Backend Instances]
+        BE1[Backend 1]
+        BE2[Backend 2]
+        BE3[Backend 3]
+    end
+    
+    subgraph RedisLayer[Redis]
+        RedisPub[(Pub/Sub)]
+        RedisCache[(Cache)]
+    end
+    
+    subgraph Database[Database]
+        Postgres[(PostgreSQL)]
+    end
+    
+    LB --> BE1
+    LB --> BE2
+    LB --> BE3
+    
+    BE1 --> RedisPub
+    BE1 --> RedisCache
+    BE2 --> RedisPub
+    BE2 --> RedisCache
+    BE3 --> RedisPub
+    BE3 --> RedisCache
+    
+    BE1 --> Postgres
+    BE2 --> Postgres
+    BE3 --> Postgres
+```
+
+**Requirements:**
+- **Redis Adapter**: Socket.IO uses Redis pub/sub for cross-instance communication
+  - Set `REDIS_URL` environment variable
+  - Same Redis instance can be used for caching and adapter
+- **Shared Redis**: All instances connect to the same Redis server
+- **Shared PostgreSQL**: All instances use the same database
+- **Load Balancer**: Must support WebSocket upgrades
+  - Nginx, HAProxy, or cloud load balancers
+  - Sticky sessions **not required** (Socket.IO handles this)
+
+**Configuration:**
+```env
+# All backend instances use the same Redis
+REDIS_URL=redis://your-redis-host:6379
+
+# All instances use the same database
+DATABASE_URL=postgresql://user:pass@host:5432/setgame
+```
+
+**Benefits:**
+- Events broadcast across all instances
+- Players can connect to any instance
+- Automatic failover if one instance goes down
+- Linear scaling with additional instances
 
 ### Database Scaling
 

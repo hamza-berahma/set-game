@@ -16,6 +16,7 @@ const pool = new pg_1.Pool({
     max: parseInt(process.env.DB_MAX_CONNECTIONS || "20"),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
+    ssl: process.env.NODE_ENV === 'production' && databaseUrl ? { rejectUnauthorized: false } : false,
 });
 pool.on("connect", () => {
     console.log("Connected to PostgreSQL database: ");

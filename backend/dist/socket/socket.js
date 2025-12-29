@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeSocket = initializeSocket;
 const socket_io_1 = require("socket.io");
+const redis_adapter_1 = require("@socket.io/redis-adapter");
+const redis_1 = require("redis");
 const jwt_1 = require("../utils/jwt");
 const GameService_1 = require("../services/GameService");
 const EventLogService_1 = require("../services/EventLogService");
@@ -23,6 +25,30 @@ function initializeSocket(server) {
             credentials: true,
         },
     });
+    // Initialize Redis adapter for horizontal scaling
+    const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+    try {
+        const pubClient = (0, redis_1.createClient)({ url: redisUrl });
+        const subClient = pubClient.duplicate();
+        pubClient.on("error", (err) => {
+            console.warn("Redis pub client error:", err.message);
+        });
+        subClient.on("error", (err) => {
+            console.warn("Redis sub client error:", err.message);
+        });
+        Promise.all([pubClient.connect(), subClient.connect()])
+            .then(() => {
+            io.adapter((0, redis_adapter_1.createAdapter)(pubClient, subClient));
+            console.log("Socket.IO Redis adapter initialized - horizontal scaling enabled");
+        })
+            .catch((err) => {
+            console.warn("Failed to initialize Redis adapter - using in-memory adapter (single instance only):", err.message);
+            console.warn("To enable horizontal scaling, ensure Redis is available at:", redisUrl);
+        });
+    }
+    catch (err) {
+        console.warn("Redis adapter initialization failed - using in-memory adapter:", err instanceof Error ? err.message : String(err));
+    }
     botManager.setIO(io);
     timerService.setIO(io);
     timerService.setOnTimerEnd(async (roomId, matchId) => {

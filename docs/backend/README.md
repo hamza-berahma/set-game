@@ -533,6 +533,101 @@ npm start
 npm test
 ```
 
+## Scaling with Redis Adapter
+
+The backend uses the Redis adapter for Socket.IO to enable horizontal scaling across multiple server instances.
+
+### Benefits
+
+- **Horizontal Scaling**: Run multiple backend instances behind a load balancer
+- **Cross-Instance Communication**: Events broadcast to all connected clients across all instances
+- **Shared Room State**: Players in the same room can be connected to different backend instances
+- **High Availability**: If one instance fails, others continue serving clients
+
+### Architecture
+
+```mermaid
+graph TB
+    subgraph LoadBalancer[Load Balancer]
+        LB[Nginx]
+    end
+    
+    subgraph BackendInstances[Backend Instances]
+        BE1[Backend 1<br/>Socket.IO]
+        BE2[Backend 2<br/>Socket.IO]
+        BE3[Backend 3<br/>Socket.IO]
+    end
+    
+    subgraph RedisLayer[Redis Pub/Sub]
+        RedisPub[(Redis Pub)]
+        RedisSub[(Redis Sub)]
+    end
+    
+    LB --> BE1
+    LB --> BE2
+    LB --> BE3
+    
+    BE1 --> RedisPub
+    BE1 --> RedisSub
+    BE2 --> RedisPub
+    BE2 --> RedisSub
+    BE3 --> RedisPub
+    BE3 --> RedisSub
+    
+    style BE1 fill:#fff4e1
+    style BE2 fill:#fff4e1
+    style BE3 fill:#fff4e1
+    style RedisPub fill:#ffebee
+    style RedisSub fill:#ffebee
+```
+
+### Setup
+
+The Redis adapter is automatically initialized when:
+1. `REDIS_URL` environment variable is set
+2. Redis server is accessible
+3. Both pub and sub clients connect successfully
+
+**Configuration:**
+```env
+REDIS_URL=redis://localhost:6379
+```
+
+### How It Works
+
+1. **Publisher Client**: Each backend instance creates a Redis publisher client
+2. **Subscriber Client**: Each instance also creates a subscriber client
+3. **Event Broadcasting**: When an event is emitted to a room:
+   - The local instance sends to its connected clients
+   - The event is published to Redis
+   - Other instances receive the event via Redis subscription
+   - Other instances broadcast to their connected clients
+
+### Graceful Fallback
+
+If Redis is unavailable:
+- Socket.IO automatically falls back to in-memory adapter
+- Server continues to function normally
+- Works for single-instance deployments
+- Warning is logged but doesn't block startup
+
+### Requirements
+
+- Redis server must be running and accessible
+- `REDIS_URL` environment variable configured
+- Same Redis instance can be used for both:
+  - Socket.IO adapter (pub/sub)
+  - Game state caching (via ioredis)
+
+### Load Balancer Configuration
+
+When using multiple instances:
+- **Sticky Sessions**: Not required for Socket.IO (works without)
+- **WebSocket Support**: Ensure load balancer supports WebSocket upgrades
+- **Health Checks**: Configure health checks for backend instances
+
+See [Deployment Guide](../deployment/README.md) for production setup details.
+
 ## Additional Documentation
 
 - [Event Logging](./event-logging.md)

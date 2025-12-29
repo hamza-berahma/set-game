@@ -7,6 +7,7 @@ A multiplayer implementation of the SET card game with real-time gameplay.
 - Real-time multiplayer gameplay via WebSockets
 - User authentication with JWT
 - Game state caching with Redis
+- Horizontal scaling support (Redis Socket.IO adapter)
 - Event logging for analytics
 - Responsive UI with neobrutalist design
 - SET game validation logic
