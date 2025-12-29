@@ -54,6 +54,20 @@ graph TB
         Services --> AuthStore
         Services --> Backend[Backend API]
     end
+    
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef page fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#000
+    classDef component fill:#90CAF9,stroke:#0D47A1,stroke-width:2px,color:#000
+    classDef service fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000
+    classDef state fill:#FFF9C4,stroke:#F9A825,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    
+    class App frontend
+    class Welcome,Login,Register,Lobby,GameRoom page
+    class Card,GameBoard,Modal,Toast,PublicGames component
+    class API,Socket service
+    class AuthStore state
+    class Backend backend
 ```
 
 ## Project Structure
@@ -94,8 +108,17 @@ graph TD
     
     GameBoard --> Card[Card x12]
     
-    style Protected fill:#f9f,stroke:#333,stroke-width:2px
-    style GameRoom fill:#bbf,stroke:#333,stroke-width:2px
+    classDef app fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef page fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#000
+    classDef protected fill:#FFF9C4,stroke:#F9A825,stroke-width:3px,color:#000
+    classDef component fill:#90CAF9,stroke:#0D47A1,stroke-width:2px,color:#000
+    classDef game fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#000
+    
+    class App,Router app
+    class Welcome,Login,Register,Lobby page
+    class Protected protected
+    class GameRoom,RoomSettings,PublicGames,EventChat,Toast game
+    class GameBoard,Card component
 ```
 
 ## Pages
@@ -371,6 +394,8 @@ sequenceDiagram
     AuthStore->>AuthStore: Store in localStorage
     AuthStore-->>Component: Updated state
     Component-->>User: Redirect to Lobby
+    
+    Note over User,Backend: Authentication Data Flow
 ```
 
 ## Styling

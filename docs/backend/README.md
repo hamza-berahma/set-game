@@ -55,6 +55,16 @@ graph TB
         Services --> Postgres
         Services --> Redis
     end
+    
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef service fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class Server,Socket,Routes,Middleware,Auth,Validation,AuthRoutes,ProfileRoutes,RoomRoutes backend
+    class GameService,EventService,CacheService,BotService,TimerService service
+    class Postgres database
+    class Redis redis
 ```
 
 ## Project Structure
@@ -102,6 +112,16 @@ graph LR
     CacheService --> Redis[(Redis)]
     EventService --> Postgres[(PostgreSQL)]
     GameService --> Postgres
+    
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef service fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class Socket backend
+    class GameService,EventService,BotService,TimerService,CacheService service
+    class Postgres database
+    class Redis redis
 ```
 
 ### GameService
@@ -136,6 +156,22 @@ flowchart TD
     SaveMemory --> LogEvent
     LogEvent --> Broadcast[Broadcast to Room]
     Broadcast --> Response[Send Response]
+    
+    classDef request fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef process fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef decision fill:#FFF9C4,stroke:#F9A825,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef success fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#000
+    classDef error fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class Request,Response request
+    class UpdateState,LogEvent,Broadcast process
+    class Validate,CheckCache decision
+    class SaveRedis,SaveMemory redis
+    class LogEvent database
+    class Response success
+    class Error error
 ```
 
 ### EventLogService
@@ -574,11 +610,13 @@ graph TB
     BE3 --> RedisPub
     BE3 --> RedisSub
     
-    style BE1 fill:#fff4e1
-    style BE2 fill:#fff4e1
-    style BE3 fill:#fff4e1
-    style RedisPub fill:#ffebee
-    style RedisSub fill:#ffebee
+    classDef loadbalancer fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class LB loadbalancer
+    class BE1,BE2,BE3 backend
+    class RedisPub,RedisSub redis
 ```
 
 ### Setup

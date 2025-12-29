@@ -30,6 +30,16 @@ graph TD
     
     SocketIO -->|State Management| Redis
     SocketIO -->|Event Logging| Postgres
+    
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class Frontend frontend
+    class Backend,SocketIO backend
+    class Postgres database
+    class Redis redis
 ```
 
 ## Components
@@ -87,6 +97,8 @@ sequenceDiagram
     Backend-->>Frontend: Token + User info
     Frontend->>Frontend: Store in Zustand
     Frontend->>Frontend: Include token in headers
+    
+    Note over User,DB: Authentication Flow
 ```
 
 ### Game Flow
@@ -124,6 +136,8 @@ sequenceDiagram
     else Invalid SET
         Socket-->>Frontend: error
     end
+    
+    Note over Player,DB: Game Flow
 ```
 
 ### State Management
@@ -159,6 +173,14 @@ graph LR
     Auth --> DB[(PostgreSQL)]
     Register --> DB
     Profile --> DB
+    
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    
+    class Frontend frontend
+    class Auth,Register,Profile,Health backend
+    class DB database
 ```
 
 ### WebSocket (Socket.IO)
@@ -183,6 +205,16 @@ graph TD
     Game --> DB[(PostgreSQL)]
     
     Socket -->|Broadcast| Frontend
+    
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class Frontend frontend
+    class Socket,Room,Game backend
+    class DB database
+    class Redis redis
 ```
 
 **Events:**

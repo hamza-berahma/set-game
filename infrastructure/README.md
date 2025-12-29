@@ -34,10 +34,18 @@ graph LR
     PG --- PG_Vol
     RD --- RD_Vol
     
-    style FE fill:#e1f5ff
-    style BE fill:#fff4e1
-    style PG fill:#e8f5e9
-    style RD fill:#ffebee
+    classDef user fill:#FFF9C4,stroke:#F9A825,stroke-width:2px,color:#000
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    classDef volume fill:#F5F5F5,stroke:#616161,stroke-width:2px,color:#000
+    
+    class User user
+    class FE frontend
+    class BE backend
+    class PG,PG_Vol database
+    class RD,RD_Vol redis
 ```
 
 ## Prerequisites

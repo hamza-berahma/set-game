@@ -119,6 +119,16 @@ graph TD
     
     SocketIO -->|State Management| Redis
     SocketIO -->|Event Logging| Postgres
+    
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    
+    class Frontend frontend
+    class Backend,SocketIO backend
+    class Postgres database
+    class Redis redis
 ```
 
 ## Technology Stack

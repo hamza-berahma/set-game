@@ -35,11 +35,19 @@ graph TB
     BE2 --> Redis
     BE2 --> Postgres
     
-    style FE1 fill:#e1f5ff
-    style BE1 fill:#fff4e1
-    style BE2 fill:#fff4e1
-    style Redis fill:#ffebee
-    style Postgres fill:#e8f5e9
+    classDef user fill:#FFF9C4,stroke:#F9A825,stroke-width:2px,color:#000
+    classDef loadbalancer fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#000
+    classDef frontend fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    
+    class Users user
+    class LB loadbalancer
+    class FE1 frontend
+    class BE1,BE2 backend
+    class Redis redis
+    class Postgres database
 ```
 
 ## Prerequisites
@@ -585,6 +593,16 @@ graph TB
     BE1 --> Postgres
     BE2 --> Postgres
     BE3 --> Postgres
+    
+    classDef loadbalancer fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#000
+    classDef backend fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef redis fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#000
+    classDef database fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    
+    class LB loadbalancer
+    class BE1,BE2,BE3 backend
+    class RedisPub,RedisCache redis
+    class Postgres database
 ```
 
 **Requirements:**

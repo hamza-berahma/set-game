@@ -139,6 +139,8 @@ sequenceDiagram
     SocketIO->>GameService: Get/Create game
     GameService-->>SocketIO: Game state
     SocketIO-->>Client: game:state:update
+    
+    Note over Client,GameService: WebSocket Connection Flow
 ```
 
 ### Connection
@@ -240,6 +242,8 @@ sequenceDiagram
         GameService->>SocketIO: Error
         SocketIO-->>Player: error
     end
+    
+    Note over Player,DB: Card Selection Flow
 ```
 
 #### Server to Client
