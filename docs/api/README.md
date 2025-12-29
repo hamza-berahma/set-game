@@ -407,3 +407,205 @@ All errors return JSON responses with error details:
 
 WebSocket errors are sent via the `error` event with a `code` field for programmatic handling.
 
+## WebSocket Client Implementation Example
+
+### Basic Setup
+
+Here's a complete example of integrating the WebSocket client in a React component:
+
+```typescript
+import { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
+import type { GameState } from '../types/game';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+function GameRoom() {
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const token = 'your-jwt-token'; // Get from auth store
+
+  useEffect(() => {
+    // Initialize socket connection
+    const newSocket = io(API_URL, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+
+    // Connection events
+    newSocket.on('connect', () => {
+      console.log('Connected:', newSocket.id);
+      setIsConnected(true);
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('Disconnected:', reason);
+      setIsConnected(false);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Connection error:', error);
+    });
+
+    // Game events
+    newSocket.on('game:state:update', (state: GameState) => {
+      setGameState(state);
+    });
+
+    newSocket.on('set:found', (data) => {
+      console.log(`${data.playerUsername} found a SET!`);
+    });
+
+    newSocket.on('player:joined', (data) => {
+      console.log(`${data.username} joined`);
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('Game error:', error.message);
+    });
+
+    setSocket(newSocket);
+
+    // Cleanup on unmount
+    return () => {
+      newSocket.close();
+    };
+  }, [token]);
+
+  // Join room
+  const joinRoom = (roomId: string) => {
+    if (socket && isConnected) {
+      socket.emit('join-room', { roomId });
+    }
+  };
+
+  // Select cards
+  const selectCards = (roomId: string, cardIds: string[]) => {
+    if (socket && isConnected) {
+      socket.emit('game:select:cards', { roomId, cardIds });
+    }
+  };
+
+  return (
+    <div>
+      {isConnected ? (
+        <div>Connected to game server</div>
+      ) : (
+        <div>Connecting...</div>
+      )}
+      {/* Your game UI here */}
+    </div>
+  );
+}
+```
+
+### Using the Socket Service (Recommended)
+
+For a cleaner implementation, use the provided `SocketService`:
+
+```typescript
+import { useEffect } from 'react';
+import { useSocket } from '../hooks/useSocket';
+import { socketService } from '../services/socketService';
+
+function GameRoom({ roomId }: { roomId: string }) {
+  const { socket, isConnected } = useSocket();
+  const [gameState, setGameState] = useState<GameState | null>(null);
+
+  useEffect(() => {
+    if (socket) {
+      socketService.setSocket(socket);
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (isConnected && roomId) {
+      // Set up event handlers
+      socketService.setHandlers({
+        onGameStateUpdate: (state) => {
+          setGameState(state);
+        },
+        onSetFound: (data) => {
+          console.log(`SET found by ${data.playerUsername}`);
+        },
+        onPlayerJoined: (data) => {
+          console.log(`${data.username} joined`);
+        },
+        onError: (error) => {
+          console.error('Error:', error.message);
+        },
+      });
+
+      // Join the room
+      socketService.joinRoom(roomId);
+    }
+
+    return () => {
+      socketService.leaveRoom();
+    };
+  }, [isConnected, roomId]);
+
+  const handleCardSelection = (cardIds: string[]) => {
+    socketService.selectCards(roomId, cardIds);
+  };
+
+  return (
+    <div>
+      {/* Game UI */}
+    </div>
+  );
+}
+```
+
+### Error Handling
+
+```typescript
+socketService.setHandlers({
+  onError: (error) => {
+    switch (error.code) {
+      case 'AUTH_ERROR':
+        // Redirect to login
+        window.location.href = '/login';
+        break;
+      case 'JOIN_ROOM_ERROR':
+        // Show error message
+        alert('Failed to join room');
+        break;
+      case 'INVALID_SELECTION':
+        // Show validation error
+        alert('Invalid card selection');
+        break;
+      default:
+        console.error('Unknown error:', error.message);
+    }
+  },
+});
+```
+
+### Reconnection Handling
+
+The Socket.IO client automatically handles reconnection. To handle reconnection events:
+
+```typescript
+socket.on('reconnect', (attemptNumber) => {
+  console.log(`Reconnected after ${attemptNumber} attempts`);
+  // Rejoin room if needed
+  if (roomId) {
+    socketService.reconnect(roomId);
+  }
+});
+
+socket.on('reconnect_attempt', () => {
+  console.log('Attempting to reconnect...');
+});
+
+socket.on('reconnect_failed', () => {
+  console.error('Failed to reconnect');
+  // Show error to user
+});
+```
+
