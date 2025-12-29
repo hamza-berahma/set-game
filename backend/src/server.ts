@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import "dotenv/config";
 import cors from "cors";
 import { createServer } from "http";
@@ -7,13 +7,12 @@ import { initializeRedis } from "./config/redis";
 import authRoutes from "./routes/auth";
 import profileRoutes from "./routes/profile";
 import roomsRoutes from "./routes/rooms";
-import { authenticate } from "./middleware/auth";
 import { initializeSocket } from "./socket/socket";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
-const io = initializeSocket(httpServer);
+initializeSocket(httpServer);
 
 const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
 app.use(cors({
@@ -42,7 +41,7 @@ app.get("/users", async (req: Request, res: Response) => {
     }
 });
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response) => {
     console.error("Error : ", err);
     res.status(500).json({
         error: "internal server error",

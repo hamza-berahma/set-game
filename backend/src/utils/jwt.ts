@@ -15,7 +15,7 @@ export function generateToken(payload: JwtPayload): string {
 export function verifyToken(token: string): JwtPayload {
     try {
         return jwt.verify(token, JWT_SECRET) as JwtPayload;
-    } catch (err) {
+    } catch {
         throw new Error("Invalid/Expired token");
     }
 }

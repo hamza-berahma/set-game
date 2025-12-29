@@ -1,13 +1,19 @@
 import pool from "../config/database";
 import { v4 as uuidv4 } from "uuid";
 
+export interface MovePayload {
+    cardIds?: string[];
+    selectedCards?: unknown[];
+    [key: string]: unknown;
+}
+
 export interface Move {
     move_id: string;
     match_id: string;
     user_id: string;
     previous_state_id: string | null;
     offset_ms: number;
-    payload: any;
+    payload: MovePayload;
     server_received_at: Date;
 }
 
@@ -16,7 +22,7 @@ export interface CreateMoveData {
     user_id: string;
     previous_state_id?: string | null;
     offset_ms: number;
-    payload: any;
+    payload: MovePayload;
 }
 
 export class MoveRepository {
@@ -64,7 +70,7 @@ export class MoveRepository {
     async getMovesByUser(userId: string, matchId?: string): Promise<Move[]> {
         try {
             let query = `SELECT * FROM moves WHERE user_id = $1`;
-            const params: any[] = [userId];
+            const params: (string | undefined)[] = [userId];
             if (matchId) {
                 query += ` AND match_id = $2`;
                 params.push(matchId);

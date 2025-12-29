@@ -118,7 +118,7 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                 username: payload.username,
             };
             next();
-        } catch (error) {
+        } catch {
             next(new Error("Invalid or expired token"));
         }
     });
@@ -193,9 +193,10 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                 });
 
                 console.log(`User ${user.username} joined room ${roomId}`);
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : "Failed to join room";
                 socket.emit("error", {
-                    message: error.message || "Failed to join room",
+                    message: errorMessage,
                     code: "JOIN_ROOM_ERROR",
                 } as SocketError);
             }
@@ -321,9 +322,10 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                 }
 
                 console.log(`User ${user.username} found a SET in room ${user.roomId}`);
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : "Failed to process card selection";
                 socket.emit("error", {
-                    message: error.message || "Failed to process card selection",
+                    message: errorMessage,
                     code: "SELECTION_ERROR",
                 } as SocketError);
             }
@@ -338,7 +340,7 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
 
                 console.log(`User ${user.username} reconnecting to room ${roomId}`);
 
-                const recoveredState = await gameService.recoverGameState(roomId, user.userId);
+                const recoveredState = await gameService.recoverGameState(roomId);
                 
                 if (recoveredState) {
                     socket.join(roomId);
@@ -377,10 +379,11 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                 } else {
                     console.log(`No game state to recover for room ${roomId}`);
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : "Failed to reconnect";
                 console.error("Error during reconnection:", error);
                 socket.emit("error", {
-                    message: error.message || "Failed to reconnect",
+                    message: errorMessage,
                     code: "RECONNECT_ERROR",
                 } as SocketError);
             }

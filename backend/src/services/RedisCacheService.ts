@@ -22,7 +22,7 @@ export class RedisCacheService {
 
             await client.setex(key, GAME_STATE_TTL, serialized);
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }
@@ -47,7 +47,7 @@ export class RedisCacheService {
             gameState.updatedAt = new Date(gameState.updatedAt);
 
             return gameState;
-        } catch (error) {
+        } catch {
             return null;
         }
     }
@@ -62,7 +62,7 @@ export class RedisCacheService {
             const key = `${GAME_STATE_PREFIX}${roomId}`;
             await client.del(key);
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }

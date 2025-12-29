@@ -1,5 +1,5 @@
 import { GameState, Card, CardSelectionResult } from "../types/game";
-import { generateDeck, shuffleDeck, isValidSet, findValidSets } from "../utils/game";
+import { generateDeck, shuffleDeck, findValidSets } from "../utils/game";
 import { RedisCacheService } from "./RedisCacheService";
 import { GameRoomRepository } from "../repositories/GameRoomRepository";
 import { MatchRepository } from "../repositories/MatchRepository";
@@ -7,7 +7,6 @@ import { GameStateRepository } from "../repositories/GameStateRepository";
 import { MoveRepository } from "../repositories/MoveRepository";
 import { MatchResultRepository } from "../repositories/MatchResultRepository";
 import { RoomParticipantRepository } from "../repositories/RoomParticipantRepository";
-import { v4 as uuidv4 } from "uuid";
 
 const gameStates = new Map<string, GameState>();
 const redisCache = new RedisCacheService();
@@ -194,7 +193,6 @@ export class GameService {
             }
         }
 
-        const previousBoard = [...gameState.board];
         gameState.board = gameState.board.filter((card: Card) => !cardIds.includes(card.id));
 
         while (gameState.board.length < 12 && gameState.deck.length > 0) {
@@ -348,7 +346,7 @@ export class GameService {
         }
     }
 
-    async recoverGameState(roomId: string, userId: string): Promise<GameState | null> {
+    async recoverGameState(roomId: string): Promise<GameState | null> {
         try {
             const cachedState = await this.getGame(roomId);
             if (cachedState) {

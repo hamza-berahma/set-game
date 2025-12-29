@@ -14,7 +14,7 @@ export type EventType =
     | "error";
 
 export interface EventData {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export class EventLogService {
@@ -45,14 +45,15 @@ export class EventLogService {
                  VALUES ($1, $2, $3, $4, $5)`,
                 [matchId || null, roomId || null, userIdValue, eventType, eventDataJson]
             );
-        } catch (error: any) {
-            if (error?.code !== '42P01') {
-                console.error("Error logging event:", error?.message || error);
+        } catch (error: unknown) {
+            if (error && typeof error === "object" && "code" in error && error.code !== '42P01') {
+                const errorMessage = "message" in error && typeof error.message === "string" ? error.message : String(error);
+                console.error("Error logging event:", errorMessage);
             }
         }
     }
 
-    async logRoomCreated(roomId: string, userId: string, settings: any): Promise<void> {
+    async logRoomCreated(roomId: string, userId: string, settings: unknown): Promise<void> {
         await this.logEvent("room_created", {
             roomId,
             userId,

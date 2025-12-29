@@ -63,8 +63,14 @@ export function useSocket() {
         };
     }, [token]);
 
+    const [socket, setSocket] = useState<Socket | null>(null);
+
+    useEffect(() => {
+        setSocket(socketRef.current);
+    }, [isConnected]);
+
     return {
-        socket: socketRef.current,
+        socket,
         isConnected,
         error,
     };

@@ -1,6 +1,6 @@
 import { Server as SocketIOServer } from "socket.io";
 import { GameService } from "./GameService";
-import { BotAI, generateBotName, generateBotDelay } from "./BotService";
+import { BotAI, generateBotName } from "./BotService";
 import { EventLogService } from "./EventLogService";
 
 interface BotInstance {
@@ -192,7 +192,7 @@ export class BotManager {
     }
 
     pauseBotsInRoom(roomId: string): void {
-        this.bots.forEach((botInstance, botId) => {
+        this.bots.forEach((botInstance) => {
             if (botInstance.roomId === roomId) {
                 botInstance.isActive = false;
                 if (botInstance.timeout) {

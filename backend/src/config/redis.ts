@@ -61,7 +61,7 @@ export function initializeRedis(): Redis | null {
         });
 
         return redisClient;
-    } catch (error) {
+    } catch {
         if (!hasLoggedConnectionWarning) {
             console.warn("Redis initialization failed - falling back to in-memory storage");
             hasLoggedConnectionWarning = true;

@@ -74,10 +74,12 @@ export default function GameRoomPage() {
                 timerDuration: roomSettings?.timerDuration,
             });
             hasJoinedRef.current = true;
-            addEvent({
-                type: 'game_started',
-                message: 'Game started!',
-            });
+            setTimeout(() => {
+                addEvent({
+                    type: 'game_started',
+                    message: 'Game started!',
+                });
+            }, 0);
         }
         return () => {
             if (roomId) {

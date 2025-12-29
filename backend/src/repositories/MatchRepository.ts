@@ -1,10 +1,15 @@
 import pool from "../config/database";
 import { v4 as uuidv4 } from "uuid";
 
+export interface DeckSeed {
+    shuffled?: boolean;
+    [key: string]: unknown;
+}
+
 export interface Match {
     match_id: string;
     room_id: string;
-    deck_seed: any | null;
+    deck_seed: DeckSeed | null;
     status: string;
     started_at: Date | null;
     finished_at: Date | null;
@@ -13,7 +18,7 @@ export interface Match {
 
 export interface CreateMatchData {
     room_id: string;
-    deck_seed?: any;
+    deck_seed?: DeckSeed;
     timer_duration_seconds?: number | null;
 }
 

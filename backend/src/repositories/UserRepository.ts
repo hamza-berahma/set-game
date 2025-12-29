@@ -38,7 +38,7 @@ export class UserRepository {
     async update(id: string, updates: UpdateUserData): Promise<User | null> {
         try {
             const fields: string[] = [];
-            const values: any[] = [];
+            const values: (string | undefined)[] = [];
             let paramCount = 1;
 
             if (updates.username !== undefined) {

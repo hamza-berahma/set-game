@@ -36,7 +36,7 @@ export function shuffleDeck<T>(array: T[]): T[] {
 }
 
 export function isValidSet(card1: Card, card2: Card, card3: Card): boolean {
-    const checkAttribute = (attr1: any, attr2: any, attr3: any) => {
+    const checkAttribute = <T>(attr1: T, attr2: T, attr3: T): boolean => {
         const allSame = attr1 === attr2 && attr2 === attr3;
         const allDifferent = attr1 !== attr2 && attr2 !== attr3 && attr1 !== attr3;
         return allSame || allDifferent;

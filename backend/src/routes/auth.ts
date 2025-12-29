@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import { UserRepository } from "../repositories/UserRepository";
 import { comparePassword, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
@@ -43,10 +43,10 @@ router.post("/register", validate(registerSchema), async (req: Request, res: Res
         };
 
         res.status(201).json(response);
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Registration error:", err);
 
-        if (err.code === "23505") {
+        if (err && typeof err === "object" && "code" in err && err.code === "23505") {
             return res.status(409).json({
                 error: "User already exists",
                 message: "Email is already registered",
@@ -94,11 +94,12 @@ router.post("/login", validate(loginSchema), async (req: Request, res: Response)
             },
         };
         res.json(response);
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Login error : ", err);
+        const errorMessage = err instanceof Error ? err.message : "Internal server error";
         res.status(500).json({
             error: "Login failed",
-            message: err.message || "Internal server error",
+            message: errorMessage,
         });
     }
 });

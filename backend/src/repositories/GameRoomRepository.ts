@@ -1,17 +1,24 @@
 import pool from "../config/database";
-import { v4 as uuidv4 } from "uuid";
+
+export interface LobbySettings {
+    maxPlayers?: number;
+    timerDuration?: number;
+    playWithBots?: boolean;
+    isPrivate?: boolean;
+    roomName?: string;
+}
 
 export interface GameRoom {
     room_id: string;
     room_code: string;
     current_match_id: string | null;
     created_at: Date;
-    lobby_settings: any | null;
+    lobby_settings: LobbySettings | null;
 }
 
 export interface CreateGameRoomData {
     room_code: string;
-    lobby_settings?: any;
+    lobby_settings?: LobbySettings;
 }
 
 export class GameRoomRepository {
@@ -100,7 +107,7 @@ export class GameRoomRepository {
         }
     }
 
-    async updateLobbySettings(roomId: string, settings: any): Promise<GameRoom | null> {
+    async updateLobbySettings(roomId: string, settings: LobbySettings): Promise<GameRoom | null> {
         try {
             const result = await pool.query(
                 `UPDATE game_rooms SET lobby_settings = $1 WHERE room_id = $2 RETURNING *`,

@@ -14,13 +14,16 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        setIsVisible(true);
+        const timeoutId = setTimeout(() => setIsVisible(true), 0);
         const timer = setTimeout(() => {
             setIsVisible(false);
             setTimeout(onClose, 300);
         }, duration);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timeoutId);
+            clearTimeout(timer);
+        };
     }, [duration, onClose]);
 
     const bgColor = {

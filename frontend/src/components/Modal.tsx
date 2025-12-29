@@ -139,8 +139,10 @@ export default function Modal({
         white: 'bg-white',
     }[type];
 
-    const titleId = title ? `modal-title-${Math.random().toString(36).substring(7)}` : undefined;
-    const contentId = `modal-content-${Math.random().toString(36).substring(7)}`;
+    const titleIdRef = useRef<string | undefined>(title ? `modal-title-${Math.random().toString(36).substring(7)}` : undefined);
+    const contentIdRef = useRef<string>(`modal-content-${Math.random().toString(36).substring(7)}`);
+    const titleId = titleIdRef.current;
+    const contentId = contentIdRef.current;
 
     return (
         <div

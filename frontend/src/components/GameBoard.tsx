@@ -35,7 +35,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                 .filter((card): card is CardType => card !== undefined);
 
             if (selectedCardObjects.length !== 3) {
-                setSelectedCardIds([]);
+                setTimeout(() => setSelectedCardIds([]), 0);
                 return;
             }
 
@@ -76,8 +76,10 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
         const allSelectedStillOnBoard = selectedCardIds.every((id) => cardIdsOnBoard.has(id));
         
         if (!allSelectedStillOnBoard && selectedCardIds.length > 0) {
-            setSelectedCardIds([]);
-            setIsValidating(false);
+            setTimeout(() => {
+                setSelectedCardIds([]);
+                setIsValidating(false);
+            }, 0);
         }
     }, [cards, selectedCardIds]);
 

@@ -1,5 +1,5 @@
 import { Card, GameState } from "../types/game";
-import { isValidSet, findValidSets } from "../utils/game";
+import { findValidSets } from "../utils/game";
 
 function skewedNormal(mean: number, stdDev: number, skewness: number = 0): number {
     const u1 = Math.random();
