@@ -36,10 +36,11 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
         req.user = payload;
         next();
-    } catch (err: any) {
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : "Invalid or expired token";
         return res.status(401).json({
             error: "Unauthorized",
-            message: err.message || "Invalid or expired token",
+            message: errorMessage,
         });
     }
 }

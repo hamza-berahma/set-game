@@ -122,12 +122,15 @@ export default function Modal({
 
     useEffect(() => {
         if (isOpen) {
-            setIsAnimating(true);
+            setTimeout(() => setIsAnimating(true), 0);
         } else {
             const timer = setTimeout(() => setIsAnimating(false), 200);
             return () => clearTimeout(timer);
         }
     }, [isOpen]);
+
+    const [titleId] = useState<string | undefined>(() => title ? `modal-title-${Math.random().toString(36).substring(7)}` : undefined);
+    const [contentId] = useState<string>(() => `modal-content-${Math.random().toString(36).substring(7)}`);
 
     if (!isOpen && !isAnimating) return null;
 
@@ -138,11 +141,6 @@ export default function Modal({
         warning: 'bg-gold',
         white: 'bg-white',
     }[type];
-
-    const titleIdRef = useRef<string | undefined>(title ? `modal-title-${Math.random().toString(36).substring(7)}` : undefined);
-    const contentIdRef = useRef<string>(`modal-content-${Math.random().toString(36).substring(7)}`);
-    const titleId = titleIdRef.current;
-    const contentId = contentIdRef.current;
 
     return (
         <div

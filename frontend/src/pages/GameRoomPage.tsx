@@ -181,7 +181,7 @@ export default function GameRoomPage() {
                 setIsProcessing(false);
             },
         });
-    }, [user, toast, addEvent, playerNames]);
+    }, [user, toast, addEvent, playerNames, gameEndModal]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {

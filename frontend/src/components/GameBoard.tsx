@@ -45,7 +45,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
                 selectedCardObjects[2],
             );
 
-            setIsValidating(true);
+            setTimeout(() => setIsValidating(true), 0);
 
             if (isValid) {
                 const cardIds = selectedCardObjects.map((c) => c.id);
@@ -66,7 +66,7 @@ export default function GameBoard({ cards, onCardSelect, isProcessing = false }:
             }
         } else if (selectedCardIds.length !== 3) {
             if (isValidating) {
-                setIsValidating(false);
+                setTimeout(() => setIsValidating(false), 0);
             }
         }
     }, [selectedCardIds, cards, isValidating, onCardSelect, showToast]);
