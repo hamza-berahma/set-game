@@ -18,6 +18,44 @@ Complete documentation for the React/TypeScript frontend application.
 
 The frontend is a single-page React application built with TypeScript, providing a real-time multiplayer SET game experience. It communicates with the backend via REST APIs for authentication and WebSockets for real-time gameplay.
 
+```mermaid
+graph TB
+    subgraph Frontend_Architecture[Frontend Architecture]
+        App[App.tsx<br/>Router]
+        
+        subgraph Pages[Pages]
+            Welcome[WelcomePage]
+            Login[LoginPage]
+            Register[RegisterPage]
+            Lobby[LobbyPage]
+            GameRoom[GameRoomPage]
+        end
+        
+        subgraph Components[Components]
+            Card[Card]
+            GameBoard[GameBoard]
+            Modal[Modal]
+            Toast[Toast]
+            PublicGames[PublicGamesList]
+        end
+        
+        subgraph Services[Services]
+            API[API Service]
+            Socket[Socket Service]
+        end
+        
+        subgraph State[State Management]
+            AuthStore[Auth Store<br/>Zustand]
+        end
+        
+        App --> Pages
+        Pages --> Components
+        Pages --> Services
+        Services --> AuthStore
+        Services --> Backend[Backend API]
+    end
+```
+
 ## Project Structure
 
 ```
@@ -31,6 +69,33 @@ frontend/src/
 ├── utils/              # Utility functions
 ├── App.tsx             # Main app component with routing
 └── main.tsx            # Application entry point
+```
+
+## Component Hierarchy
+
+```mermaid
+graph TD
+    App[App] --> Router[React Router]
+    
+    Router --> Welcome[WelcomePage]
+    Router --> Login[LoginPage]
+    Router --> Register[RegisterPage]
+    Router --> Protected[ProtectedRoute]
+    
+    Protected --> Lobby[LobbyPage]
+    Protected --> GameRoom[GameRoomPage]
+    
+    Lobby --> RoomSettings[RoomSettingsModal]
+    Lobby --> PublicGames[PublicGamesList]
+    
+    GameRoom --> GameBoard[GameBoard]
+    GameRoom --> EventChat[EventChat]
+    GameRoom --> Toast[ToastContainer]
+    
+    GameBoard --> Card[Card x12]
+    
+    style Protected fill:#f9f,stroke:#333,stroke-width:2px
+    style GameRoom fill:#bbf,stroke:#333,stroke-width:2px
 ```
 
 ## Pages
@@ -262,6 +327,16 @@ Custom hook for managing modal open/close state.
 
 Zustand store for authentication state.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Unauthenticated: Initial Load
+    Unauthenticated --> Authenticating: Login/Register
+    Authenticating --> Authenticated: Success
+    Authenticating --> Unauthenticated: Failure
+    Authenticated --> Unauthenticated: Logout
+    Authenticated --> Authenticated: Token Refresh
+```
+
 **State:**
 - `user`: Current user object
 - `token`: JWT authentication token
@@ -276,6 +351,27 @@ Zustand store for authentication state.
 - Persistent storage (localStorage)
 - Automatic token management
 - User profile storage
+
+### Data Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component
+    participant AuthStore
+    participant API
+    participant Backend
+    
+    User->>Component: Login action
+    Component->>API: POST /api/auth/login
+    API->>Backend: HTTP Request
+    Backend-->>API: Token + User
+    API-->>Component: Response
+    Component->>AuthStore: login(token, user)
+    AuthStore->>AuthStore: Store in localStorage
+    AuthStore-->>Component: Updated state
+    Component-->>User: Redirect to Lobby
+```
 
 ## Styling
 

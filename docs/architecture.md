@@ -6,26 +6,30 @@ This document provides a high-level overview of the SET Game application archite
 
 The application follows a client-server architecture with real-time communication:
 
-```
-┌─────────────┐         HTTP/REST          ┌─────────────┐
-│   React     │───────────────────────────>│   Express   │
-│  Frontend   │                             │   Backend   │
-│             │<───────────────────────────│             │
-└─────────────┘      WebSocket/Socket.IO   └─────────────┘
-       │                                           │
-       │                                           │
-       │                                    ┌──────┴──────┐
-       │                                    │             │
-       │                                    │  PostgreSQL │
-       │                                    │             │
-       │                                    └──────┬──────┘
-       │                                           │
-       │                                    ┌──────┴──────┐
-       │                                    │             │
-       │                                    │    Redis    │
-       │                                    │             │
-       │                                    └─────────────┘
-       │
+```mermaid
+graph TD
+    subgraph Client_Layer[Client Layer]
+        Frontend[React Frontend<br/>Vite/TypeScript]
+    end
+    
+    subgraph Server_Layer[Server Layer]
+        Backend[Express Backend<br/>Node.js/TypeScript]
+        SocketIO[Socket.IO Server<br/>Real-time Events]
+    end
+    
+    subgraph Data_Layer[Data Layer]
+        Postgres[(PostgreSQL<br/>Persistent Storage)]
+        Redis[(Redis<br/>Caching/Session)]
+    end
+    
+    Frontend -->|HTTP/REST<br/>Auth & Profile| Backend
+    Frontend -->|WebSocket<br/>Real-time Gameplay| SocketIO
+    
+    Backend -->|SQL Queries| Postgres
+    Backend -->|Key-Value Ops| Redis
+    
+    SocketIO -->|State Management| Redis
+    SocketIO -->|Event Logging| Postgres
 ```
 
 ## Components
@@ -68,19 +72,59 @@ The backend provides RESTful APIs and WebSocket server for real-time gameplay.
 
 ### Authentication Flow
 
-1. User submits credentials via REST API
-2. Backend validates and generates JWT token
-3. Frontend stores token and user info in Zustand store
-4. Token included in subsequent API requests via interceptors
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant DB as PostgreSQL
+    
+    User->>Frontend: Enter credentials
+    Frontend->>Backend: POST /api/auth/login
+    Backend->>DB: Validate credentials
+    DB-->>Backend: User data
+    Backend->>Backend: Generate JWT token
+    Backend-->>Frontend: Token + User info
+    Frontend->>Frontend: Store in Zustand
+    Frontend->>Frontend: Include token in headers
+```
 
 ### Game Flow
 
-1. User joins room via WebSocket
-2. Backend creates/retrieves game state (Redis or memory)
-3. Game state synchronized via Socket.IO events
-4. Card selections validated client-side, then server-side
-5. Valid SETs update game state and broadcast to all players
-6. Events logged to database for analytics
+```mermaid
+sequenceDiagram
+    participant Player as User
+    participant Frontend
+    participant Socket as Socket.IO
+    participant Redis
+    participant DB as PostgreSQL
+    
+    Player->>Frontend: Join room
+    Frontend->>Socket: join-room event
+    Socket->>Redis: Check game state
+    alt Game exists
+        Redis-->>Socket: Return state
+    else New game
+        Socket->>Socket: Create new game
+        Socket->>Redis: Save state
+        Socket->>DB: Log game start
+    end
+    Socket-->>Frontend: game:state:update
+    
+    Player->>Frontend: Select 3 cards
+    Frontend->>Frontend: Client validation
+    Frontend->>Socket: game:select:cards
+    Socket->>Socket: Server validation
+    
+    alt Valid SET
+        Socket->>Redis: Update game state
+        Socket->>DB: Log move
+        Socket->>Socket: Broadcast to room
+        Socket-->>Frontend: set:found + state update
+    else Invalid SET
+        Socket-->>Frontend: error
+    end
+```
 
 ### State Management
 
@@ -105,6 +149,18 @@ Used for:
 
 Endpoints follow RESTful conventions with JSON payloads.
 
+```mermaid
+graph LR
+    Frontend[Frontend] -->|POST /api/auth/login| Auth[Auth Endpoint]
+    Frontend -->|POST /api/auth/register| Register[Register Endpoint]
+    Frontend -->|GET /api/profile| Profile[Profile Endpoint]
+    Frontend -->|GET /health| Health[Health Check]
+    
+    Auth --> DB[(PostgreSQL)]
+    Register --> DB
+    Profile --> DB
+```
+
 ### WebSocket (Socket.IO)
 
 Used for:
@@ -114,7 +170,22 @@ Used for:
 - Score updates
 - Game end notifications
 
-Events:
+```mermaid
+graph TD
+    Frontend[Frontend] -->|WebSocket Connection| Socket[Socket.IO Server]
+    
+    Socket -->|join-room| Room[Room Manager]
+    Socket -->|game:select:cards| Game[Game Service]
+    Socket -->|leave-room| Room
+    
+    Room --> Redis[(Redis Cache)]
+    Game --> Redis
+    Game --> DB[(PostgreSQL)]
+    
+    Socket -->|Broadcast| Frontend
+```
+
+**Events:**
 - `join-room`: Player joins a game room
 - `leave-room`: Player leaves a room
 - `game:select:cards`: Submit card selection

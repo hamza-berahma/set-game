@@ -9,6 +9,37 @@ This directory contains Docker Compose configuration for the complete SET game a
 - **Backend**: Node.js/Express API server (port 5000)
 - **Frontend**: React application served via Nginx (port 3000)
 
+## Infrastructure Architecture
+
+```mermaid
+graph LR
+    subgraph Network[setgame-network]
+        FE[Frontend Container<br/>Port 3000<br/>Nginx]
+        BE[Backend Container<br/>Port 5000<br/>Node.js/Express]
+        PG[Postgres Container<br/>Port 5432<br/>PostgreSQL 15]
+        RD[Redis Container<br/>Port 6379<br/>Redis 7]
+    end
+    
+    User((User Browser)) -->|HTTP| FE
+    FE -->|HTTP/REST| BE
+    FE -->|WebSocket| BE
+    BE -->|SQL Queries| PG
+    BE -->|Key-Value| RD
+    
+    subgraph Volumes[Persistent Volumes]
+        PG_Vol[(postgres_data)]
+        RD_Vol[(redis_data)]
+    end
+    
+    PG --- PG_Vol
+    RD --- RD_Vol
+    
+    style FE fill:#e1f5ff
+    style BE fill:#fff4e1
+    style PG fill:#e8f5e9
+    style RD fill:#ffebee
+```
+
 ## Prerequisites
 
 - Docker and Docker Compose installed

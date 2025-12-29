@@ -92,6 +92,34 @@ set-game/
 └── paper/           # Educational materials
 ```
 
+## System Architecture
+
+```mermaid
+graph TD
+    subgraph Client_Layer[Client Layer]
+        Frontend[React Frontend<br/>Vite/TypeScript]
+    end
+    
+    subgraph Server_Layer[Server Layer]
+        Backend[Express Backend<br/>Node.js/TypeScript]
+        SocketIO[Socket.IO Server<br/>Real-time Events]
+    end
+    
+    subgraph Data_Layer[Data Layer]
+        Postgres[(PostgreSQL<br/>Persistent Storage)]
+        Redis[(Redis<br/>Caching/Session)]
+    end
+    
+    Frontend -->|HTTP/REST<br/>Auth & Profile| Backend
+    Frontend -->|WebSocket<br/>Real-time Gameplay| SocketIO
+    
+    Backend -->|SQL Queries| Postgres
+    Backend -->|Key-Value Ops| Redis
+    
+    SocketIO -->|State Management| Redis
+    SocketIO -->|Event Logging| Postgres
+```
+
 ## Technology Stack
 
 **Backend:**

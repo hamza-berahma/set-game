@@ -120,6 +120,27 @@ Health check endpoint.
 
 ## WebSocket API
 
+### Connection Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant SocketIO
+    participant Auth
+    participant GameService
+    
+    Client->>SocketIO: Connect
+    Client->>SocketIO: auth event (token)
+    SocketIO->>Auth: Verify JWT
+    Auth-->>SocketIO: User authenticated
+    SocketIO-->>Client: Connection established
+    
+    Client->>SocketIO: join-room
+    SocketIO->>GameService: Get/Create game
+    GameService-->>SocketIO: Game state
+    SocketIO-->>Client: game:state:update
+```
+
 ### Connection
 
 Connect to WebSocket server:
@@ -193,6 +214,33 @@ Submit card selection for validation.
 - `set:found`: If valid SET (broadcast to all)
 - `game:state:update`: Updated board state
 - `error`: If invalid selection
+
+**Flow Diagram:**
+
+```mermaid
+sequenceDiagram
+    participant Player
+    participant SocketIO
+    participant GameService
+    participant Redis
+    participant DB
+    
+    Player->>SocketIO: game:select:cards
+    SocketIO->>GameService: processCardSelection()
+    GameService->>GameService: Validate SET
+    
+    alt Valid SET
+        GameService->>Redis: Update game state
+        GameService->>DB: Log move
+        GameService->>SocketIO: Success
+        SocketIO->>SocketIO: Broadcast to room
+        SocketIO-->>Player: set:found
+        SocketIO-->>Player: game:state:update
+    else Invalid SET
+        GameService->>SocketIO: Error
+        SocketIO-->>Player: error
+    end
+```
 
 #### Server to Client
 

@@ -18,6 +18,45 @@ Complete documentation for the Node.js/Express backend application.
 
 The backend is a Node.js application built with Express, TypeScript, and Socket.IO. It provides REST APIs for authentication and WebSocket server for real-time multiplayer gameplay.
 
+```mermaid
+graph TB
+    subgraph Backend_Architecture[Backend Architecture]
+        Server[Express Server]
+        Socket[Socket.IO Server]
+        
+        subgraph Services[Services Layer]
+            GameService[GameService]
+            EventService[EventLogService]
+            CacheService[RedisCacheService]
+            BotService[BotService]
+            TimerService[TimerService]
+        end
+        
+        subgraph Middleware[Middleware]
+            Auth[Auth Middleware]
+            Validation[Validation Middleware]
+        end
+        
+        subgraph Routes[Routes]
+            AuthRoutes[Auth Routes]
+            ProfileRoutes[Profile Routes]
+            RoomRoutes[Room Routes]
+        end
+        
+        subgraph Data[Data Layer]
+            Postgres[(PostgreSQL)]
+            Redis[(Redis)]
+        end
+        
+        Server --> Routes
+        Routes --> Middleware
+        Routes --> Services
+        Socket --> Services
+        Services --> Postgres
+        Services --> Redis
+    end
+```
+
 ## Project Structure
 
 ```
@@ -46,6 +85,25 @@ backend/src/
 
 ## Services
 
+### Service Architecture
+
+```mermaid
+graph LR
+    Socket[Socket.IO] --> GameService[GameService]
+    Socket --> EventService[EventLogService]
+    Socket --> BotService[BotService]
+    Socket --> TimerService[TimerService]
+    
+    GameService --> CacheService[RedisCacheService]
+    GameService --> EventService
+    BotService --> GameService
+    TimerService --> GameService
+    
+    CacheService --> Redis[(Redis)]
+    EventService --> Postgres[(PostgreSQL)]
+    GameService --> Postgres
+```
+
 ### GameService
 
 Manages game state and game logic.
@@ -63,6 +121,22 @@ Manages game state and game logic.
 **State Storage:**
 - Primary: Redis cache (24h TTL)
 - Fallback: In-memory Map
+
+```mermaid
+flowchart TD
+    Request[Card Selection Request] --> Validate{Validate SET}
+    Validate -->|Valid| UpdateState[Update Game State]
+    Validate -->|Invalid| Error[Return Error]
+    
+    UpdateState --> CheckCache{Check Redis}
+    CheckCache -->|Available| SaveRedis[Save to Redis]
+    CheckCache -->|Unavailable| SaveMemory[Save to Memory]
+    
+    SaveRedis --> LogEvent[Log Event to DB]
+    SaveMemory --> LogEvent
+    LogEvent --> Broadcast[Broadcast to Room]
+    Broadcast --> Response[Send Response]
+```
 
 ### EventLogService
 
