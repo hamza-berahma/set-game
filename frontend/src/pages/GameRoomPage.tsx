@@ -85,6 +85,8 @@ export default function GameRoomPage() {
             if (roomId) {
                 hasJoinedRef.current = false;
                 socketService.leaveRoom();
+                // Reset timer when leaving room
+                setTimeRemaining(null);
             }
         };
     }, [socket, isConnected, roomId, addEvent, roomSettings]);
@@ -160,9 +162,12 @@ export default function GameRoomPage() {
                 });
                 gameEndModal.open();
             },
-            onTimerStart: () => {
+            onTimerStart: (data) => {
+                // Initialize timer display when timer starts
+                setTimeRemaining(data.duration || 0);
             },
             onTimerUpdate: (data) => {
+                // Update timer display with remaining time from backend
                 setTimeRemaining(data.remaining);
             },
             onTimerEnd: () => {
