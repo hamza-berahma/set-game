@@ -135,6 +135,10 @@ export class TimerService {
                 remaining,
                 total: timerInfo.duration,
             });
+            // Debug: log every 10 seconds
+            if (remaining % 10 === 0) {
+                console.log(`Timer update: room ${roomId}, ${remaining}s remaining`);
+            }
         }
     }
 
