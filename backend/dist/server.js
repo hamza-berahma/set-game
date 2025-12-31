@@ -58,13 +58,24 @@ app.use((0, cors_1.default)({
         if (corsOrigin === '*') {
             return callback(null, true);
         }
+        // Normalize incoming origin (remove trailing slashes, trim)
+        const normalizedOrigin = origin.trim().replace(/\/+$/, '');
         const allowedOrigins = corsOrigins;
-        if (allowedOrigins.includes(origin)) {
+        // Check if normalized origin matches any allowed origin
+        const matchedOrigin = allowedOrigins.find(allowed => {
+            const normalizedAllowed = allowed.trim().replace(/\/+$/, '');
+            return normalizedAllowed === normalizedOrigin;
+        });
+        if (matchedOrigin) {
+            // Return the matched origin (use the original allowed origin, not normalized)
             return callback(null, true);
         }
-        console.warn(`CORS blocked origin: ${origin}`);
-        console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
-        callback(new Error('Not allowed by CORS'));
+        // Debug logging
+        console.warn(`❌ CORS blocked origin: "${origin}"`);
+        console.warn(`   Normalized to: "${normalizedOrigin}"`);
+        console.warn(`   Allowed origins: ${allowedOrigins.map(o => `"${o}"`).join(', ')}`);
+        console.warn(`   Normalized allowed: ${allowedOrigins.map(o => `"${o.trim().replace(/\/+$/, '')}"`).join(', ')}`);
+        callback(new Error(`CORS: Origin "${origin}" not allowed`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
