@@ -1,4 +1,5 @@
 import pool from "../config/database";
+import { v4 as uuidv4 } from "uuid";
 
 export interface LobbySettings {
     maxPlayers?: number;
@@ -68,7 +69,6 @@ export class GameRoomRepository {
     async create(roomId: string, data?: Partial<CreateGameRoomData>): Promise<GameRoom> {
         try {
             // Generate UUID for room_id (database requires UUID)
-            const { v4: uuidv4 } = await import("uuid");
             const roomUuid = uuidv4();
             
             // Use provided room_code or extract from roomId, or generate new one
