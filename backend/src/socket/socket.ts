@@ -206,6 +206,28 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                     status: gameState.status,
                     players: gameState.players,
                 });
+                
+                // Send timer info if timer is active (for players joining mid-game)
+                if (gameState.matchId) {
+                    const remaining = timerService.getRemainingTime(roomId);
+                    if (remaining !== null && remaining > 0) {
+                        const timerInfo = timerService.getTimerInfo(roomId);
+                        if (timerInfo) {
+                            socket.emit("timer:start", {
+                                roomId,
+                                matchId: gameState.matchId,
+                                duration: timerInfo.duration,
+                                startedAt: timerInfo.startedAt.toISOString(),
+                            });
+                            socket.emit("timer:update", {
+                                roomId,
+                                matchId: gameState.matchId,
+                                remaining,
+                                total: timerInfo.duration,
+                            });
+                        }
+                    }
+                }
 
                 console.log(`User ${user.username} joined room ${roomId}`);
             } catch (error: unknown) {
