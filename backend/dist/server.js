@@ -26,19 +26,31 @@ app.use(express_1.default.json());
 app.use("/api/auth", auth_1.default);
 app.use("/api", profile_1.default);
 app.use("/api/rooms", rooms_1.default);
-app.get("/health", async (_req, res) => {
+// Simple health check - just confirms server is running
+// Railway may check either /health or /healthcheck
+const healthCheck = (_req, res) => {
+    res.status(200).json({
+        status: "ok",
+        timestamp: new Date().toISOString(),
+    });
+};
+app.get("/health", healthCheck);
+app.get("/healthcheck", healthCheck);
+// Readiness check - confirms database connectivity
+app.get("/health/ready", async (_req, res) => {
     try {
-        // Quick database connectivity check
         await database_1.default.query("SELECT 1");
-        res.json({
-            status: "ok",
+        res.status(200).json({
+            status: "ready",
+            database: "connected",
             timestamp: new Date().toISOString(),
         });
     }
     catch (err) {
-        console.error("Health check failed:", err);
+        console.error("Readiness check failed:", err);
         res.status(503).json({
-            status: "error",
+            status: "not ready",
+            database: "disconnected",
             message: "Database connection failed",
         });
     }
@@ -62,7 +74,17 @@ app.use((err, _req, res) => {
 });
 (0, redis_1.initializeRedis)();
 const port = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
+// Start server
 httpServer.listen(port, "0.0.0.0", () => {
     console.log(`Server listening on 0.0.0.0:${port}`);
     console.log(`Socket.IO server initialized`);
+    console.log(`Health check available at http://0.0.0.0:${port}/health`);
+});
+// Handle server errors
+httpServer.on('error', (err) => {
+    console.error('Server error:', err);
+    if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${port} is already in use`);
+    }
+    process.exit(1);
 });
