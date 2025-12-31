@@ -189,23 +189,40 @@ app.use((err, _req, res, _next) => {
 // Initialize Redis (non-blocking)
 (0, redis_1.initializeRedis)();
 const port = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
-// Add process error handlers
+// Add process error handlers (must be before server starts)
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
-    // Don't exit - log and continue
+    console.error('Stack:', err.stack);
+    // Don't exit - let Railway handle restarts
 });
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    // Don't exit - log and continue
+    console.error('Unhandled Rejection at:', promise);
+    console.error('Reason:', reason);
+    // Don't exit - let Railway handle restarts
+});
+// Keep process alive
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully...');
+    httpServer.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
 });
 // Start server
-httpServer.listen(port, "0.0.0.0", () => {
-    console.log(`Server listening on 0.0.0.0:${port}`);
-    console.log(`Socket.IO server initialized`);
-    console.log(`Health check available at http://0.0.0.0:${port}/health`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`Database URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
-});
+try {
+    httpServer.listen(port, "0.0.0.0", () => {
+        console.log(`✓ Server listening on 0.0.0.0:${port}`);
+        console.log(`✓ Socket.IO server initialized`);
+        console.log(`✓ Health check available at http://0.0.0.0:${port}/health`);
+        console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`✓ Database URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
+        console.log(`✓ Server ready to accept connections`);
+    });
+}
+catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+}
 // Handle server errors
 httpServer.on('error', (err) => {
     console.error('Server error:', err);
