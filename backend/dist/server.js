@@ -38,9 +38,29 @@ const PORT = process.env.PORT || 5000;
 const httpServer = (0, http_1.createServer)(app);
 (0, socket_1.initializeSocket)(httpServer);
 const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
+const corsOrigins = corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim());
+const corsOriginsList = corsOrigin === '*' ? 'all origins (*)' : corsOrigins.join(', ');
+console.log(`CORS Configuration: Allowing ${corsOriginsList}`);
 app.use((0, cors_1.default)({
-    origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim()),
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) {
+            return callback(null, true);
+        }
+        if (corsOrigin === '*') {
+            return callback(null, true);
+        }
+        const allowedOrigins = corsOrigins;
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        console.warn(`CORS blocked origin: ${origin}`);
+        console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express_1.default.json());
 app.use("/api/auth", auth_1.default);
