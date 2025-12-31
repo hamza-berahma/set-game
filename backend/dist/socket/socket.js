@@ -18,9 +18,11 @@ const timerService = new TimerService_1.TimerService();
 const matchRepo = new MatchRepository_1.MatchRepository();
 const matchResultRepo = new MatchResultRepository_1.MatchResultRepository();
 function initializeSocket(server) {
+    const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
+    const corsOrigins = corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim());
     const io = new socket_io_1.Server(server, {
         cors: {
-            origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+            origin: corsOrigins,
             methods: ["GET", "POST"],
             credentials: true,
         },

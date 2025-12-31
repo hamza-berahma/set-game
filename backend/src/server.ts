@@ -9,6 +9,24 @@ import profileRoutes from "./routes/profile";
 import roomsRoutes from "./routes/rooms";
 import { initializeSocket } from "./socket/socket";
 
+// Startup validation
+console.log("=== Server Startup ===");
+console.log(`NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
+console.log(`DATABASE_URL: ${process.env.DATABASE_URL ? 'Set' : 'NOT SET - Database connection will fail!'}`);
+console.log(`JWT_SECRET: ${process.env.JWT_SECRET ? 'Set' : 'NOT SET - Authentication will fail!'}`);
+console.log(`PORT: ${process.env.PORT || '5000 (default)'}`);
+console.log(`CORS_ORIGIN: ${process.env.CORS_ORIGIN || 'not set (using defaults)'}`);
+
+if (!process.env.DATABASE_URL && process.env.NODE_ENV === 'production') {
+    console.warn("⚠️  WARNING: DATABASE_URL not set in production!");
+    console.warn("   Please add PostgreSQL service and link DATABASE_URL in Railway");
+}
+
+if (!process.env.JWT_SECRET) {
+    console.warn("⚠️  WARNING: JWT_SECRET not set!");
+    console.warn("   Authentication will not work. Generate one with: openssl rand -base64 32");
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
@@ -74,15 +92,29 @@ app.use((err: Error, _req: Request, res: Response) => {
     });
 });
 
+// Initialize Redis (non-blocking)
 initializeRedis();
 
 const port = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
+
+// Add process error handlers
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // Don't exit - log and continue
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Don't exit - log and continue
+});
 
 // Start server
 httpServer.listen(port, "0.0.0.0", () => {
     console.log(`Server listening on 0.0.0.0:${port}`);
     console.log(`Socket.IO server initialized`);
     console.log(`Health check available at http://0.0.0.0:${port}/health`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Database URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
 });
 
 // Handle server errors
@@ -91,5 +123,6 @@ httpServer.on('error', (err: NodeJS.ErrnoException) => {
     if (err.code === 'EADDRINUSE') {
         console.error(`Port ${port} is already in use`);
     }
-    process.exit(1);
+    // Don't exit immediately - let Railway handle restarts
+    console.error('Server will attempt to restart...');
 });
