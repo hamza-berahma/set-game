@@ -10,6 +10,7 @@ const migrations = [
     "001_initial_schema.sql",
     "002_room_settings_and_logging.sql",
     "003_user_profile.sql",
+    "004_fix_event_logging.sql",
 ];
 
 async function tableExists(tableName: string): Promise<boolean> {

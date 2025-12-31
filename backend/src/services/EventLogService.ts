@@ -40,10 +40,19 @@ export class EventLogService {
                 }
             }
 
+            // Convert roomId to UUID if it's a valid UUID string, otherwise null
+            let roomIdValue: string | null = null;
+            if (roomId) {
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(roomId)) {
+                    roomIdValue = roomId;
+                }
+            }
+            
             await pool.query(
                 `INSERT INTO game_event_log (match_id, room_id, user_id, event_type, event_data)
                  VALUES ($1, $2, $3, $4, $5)`,
-                [matchId || null, roomId || null, userIdValue, eventType, eventDataJson]
+                [matchId || null, roomIdValue, userIdValue, eventType, eventDataJson]
             );
         } catch (error: unknown) {
             if (error && typeof error === "object" && "code" in error && error.code !== '42P01') {

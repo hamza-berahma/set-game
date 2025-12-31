@@ -50,7 +50,8 @@ CREATE TABLE match_results (
     PRIMARY KEY (match_id, user_id)
 );
 
--- GameStates table
+-- GameStates table (for event sourcing/replay - currently not actively used)
+-- Reserved for future replay functionality
 CREATE TABLE game_states (
     state_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     match_id UUID NOT NULL REFERENCES matches(match_id),
@@ -60,7 +61,8 @@ CREATE TABLE game_states (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Moves table
+-- Moves table (for event sourcing/replay - currently not actively used)
+-- Reserved for future replay functionality and move history
 CREATE TABLE moves (
     move_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     match_id UUID NOT NULL REFERENCES matches(match_id),

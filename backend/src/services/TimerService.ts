@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from "socket.io";
 import { MatchRepository } from "../repositories/MatchRepository";
+import { EventLogService } from "./EventLogService";
 
 interface TimerInfo {
     matchId: string;
@@ -15,10 +16,12 @@ export class TimerService {
     private timers: Map<string, TimerInfo> = new Map();
     private io: SocketIOServer | null = null;
     private matchRepo: MatchRepository;
+    private eventLogService: EventLogService;
     private onTimerEndCallback: TimerEndCallback | null = null;
 
     constructor() {
         this.matchRepo = new MatchRepository();
+        this.eventLogService = new EventLogService();
     }
 
     setOnTimerEnd(callback: TimerEndCallback) {
@@ -55,6 +58,11 @@ export class TimerService {
                 startedAt: startedAt.toISOString(),
             });
         }
+        
+        // Log timer start event
+        this.eventLogService.logTimerEvent(roomId, matchId, "timer_started", durationSeconds).catch(err => {
+            console.error("Error logging timer start:", err);
+        });
 
         timerInfo.intervalId = setInterval(() => {
             this.broadcastTimerUpdate(roomId, timerInfo);
@@ -104,6 +112,11 @@ export class TimerService {
             this.io.to(roomId).emit("timer:end", {
                 roomId,
                 matchId: timerInfo.matchId,
+            });
+            
+            // Log timer end event
+            this.eventLogService.logTimerEvent(roomId, timerInfo.matchId, "timer_ended", timerInfo.duration).catch(err => {
+                console.error("Error logging timer end:", err);
             });
             
             if (this.onTimerEndCallback) {

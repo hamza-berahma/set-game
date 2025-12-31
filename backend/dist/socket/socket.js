@@ -131,6 +131,8 @@ function initializeSocket(server) {
                 user.roomId = roomId;
                 let gameState = await gameService.getGame(roomId);
                 if (!gameState) {
+                    // Log room creation when first player joins
+                    await eventLogService.logRoomCreated(roomId, user.userId, settings);
                     gameState = await gameService.createGame(roomId, [user.userId], {
                         timerDuration: settings?.timerDuration,
                         maxPlayers: settings?.maxPlayers,
