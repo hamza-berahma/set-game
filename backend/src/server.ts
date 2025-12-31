@@ -55,13 +55,19 @@ if (corsOrigin === '*') {
     console.log('CORS Configuration: Allowing all origins (*)');
     app.use(cors({
         origin: (origin, callback) => {
-            // When credentials: true, we must return the actual origin string, not true or *
-            // This allows all origins while still supporting credentials
-            callback(null, origin || '*');
+            // When credentials: true, we must return the actual origin string, not '*' or true
+            if (!origin) {
+                // Requests with no origin (like Postman, curl) - allow but no credentials
+                return callback(null, true);
+            }
+            // Return the actual origin to allow it with credentials
+            callback(null, origin);
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
     }));
 } else {
     const allowedList = (corsOrigins as string[]).join(', ');
