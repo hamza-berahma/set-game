@@ -51,7 +51,14 @@ const corsOrigins: string[] | '*' = corsOrigin === '*'
     : corsOrigin.split(',').map(origin => origin.trim().replace(/\/+$/, ''));
 
 const httpServer = createServer(app);
-initializeSocket(httpServer);
+
+// Initialize Socket.IO (must be after httpServer creation, before routes)
+try {
+    initializeSocket(httpServer);
+} catch (err) {
+    console.error('Failed to initialize Socket.IO:', err);
+    // Continue anyway - server can still handle HTTP requests
+}
 
 // CORS configuration - must be before routes
 if (corsOrigin === '*') {
@@ -226,27 +233,29 @@ process.on('SIGTERM', () => {
     });
 });
 
-// Start server
-try {
-    httpServer.listen(port, "0.0.0.0", () => {
-        console.log(`✓ Server listening on 0.0.0.0:${port}`);
-        console.log(`✓ Socket.IO server initialized`);
-        console.log(`✓ Health check available at http://0.0.0.0:${port}/health`);
-        console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`✓ Database URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
-        console.log(`✓ Server ready to accept connections`);
-    });
-} catch (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-}
-
-// Handle server errors
+// Handle server errors BEFORE listening
 httpServer.on('error', (err: NodeJS.ErrnoException) => {
     console.error('Server error:', err);
     if (err.code === 'EADDRINUSE') {
         console.error(`Port ${port} is already in use`);
+        process.exit(1);
     }
-    // Don't exit immediately - let Railway handle restarts
-    console.error('Server will attempt to restart...');
+    console.error('Server error details:', err.message);
+});
+
+// Start server - use callback to ensure it's actually listening
+httpServer.listen(port, "0.0.0.0", () => {
+    console.log(`✓ Server listening on 0.0.0.0:${port}`);
+    console.log(`✓ Socket.IO server initialized`);
+    console.log(`✓ Health check available at http://0.0.0.0:${port}/health`);
+    console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`✓ Database URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
+    console.log(`✓ Server ready to accept connections`);
+    
+    // Verify server is actually listening
+    const address = httpServer.address();
+    if (address) {
+        const addrStr = typeof address === 'string' ? address : `${address.address}:${address.port}`;
+        console.log(`✓ Server bound to: ${addrStr}`);
+    }
 });
