@@ -142,8 +142,10 @@ function initializeSocket(server) {
                     });
                     await gameService.addPlayerToRoom(roomId, user.userId);
                     await eventLogService.logGameStarted(roomId, gameState.matchId || roomId);
-                    if (gameState.matchId && settings?.timerDuration && settings.timerDuration > 0) {
-                        await timerService.startTimer(roomId, gameState.matchId, settings.timerDuration);
+                    if (settings?.timerDuration && settings.timerDuration > 0) {
+                        const matchId = gameState.matchId || roomId;
+                        console.log(`Starting timer for room ${roomId}, match ${matchId}, duration: ${settings.timerDuration}s`);
+                        await timerService.startTimer(roomId, matchId, settings.timerDuration);
                     }
                     const playWithBots = settings?.playWithBots !== false;
                     console.log(`Play with bots: ${playWithBots} (settings:`, settings, ')');
