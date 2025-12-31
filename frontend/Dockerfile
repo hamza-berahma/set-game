@@ -19,18 +19,18 @@ ENV VITE_API_URL=$VITE_API_URL
 # Build application
 RUN npm run build
 
-# Production stage with nginx
-FROM nginx:alpine
+# Production stage with Node.js server
+FROM node:20-alpine
 
-# Copy built files to nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy built files and server script
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server.cjs ./
 
-# Expose port
-EXPOSE 80
+# Expose port (Railway will set PORT env var)
+EXPOSE 3000
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start Node.js server
+CMD ["node", "server.cjs"]
 
