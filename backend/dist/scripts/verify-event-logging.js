@@ -25,6 +25,7 @@ async function verifyEventLogging() {
             process.exit(1);
         }
         console.log("✅ game_event_log table exists");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
         console.error("❌ Error checking table:", error.message);
@@ -42,6 +43,7 @@ async function verifyEventLogging() {
             eventData: { test: true, timestamp: new Date().toISOString() },
         });
         console.log("✅ Event logged successfully");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
         console.error("❌ Error logging test event:", error.message);
@@ -62,6 +64,7 @@ async function verifyEventLogging() {
         console.log(`   Room ID: ${event.room_id}`);
         console.log(`   Created At: ${event.created_at}`);
         console.log(`   Event Data: ${JSON.stringify(event.event_data)}`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
         console.error("❌ Error verifying event:", error.message);
@@ -71,6 +74,7 @@ async function verifyEventLogging() {
     try {
         await database_1.default.query(`DELETE FROM game_event_log WHERE room_id = $1`, [testRoomId]);
         console.log("\n✅ Test event cleaned up");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (error) {
         console.warn("⚠️  Warning: Could not clean up test event:", error.message);

@@ -103,7 +103,7 @@ function initializeSocket(server) {
             };
             next();
         }
-        catch (error) {
+        catch {
             next(new Error("Invalid or expired token"));
         }
     });
@@ -168,8 +168,9 @@ function initializeSocket(server) {
                 console.log(`User ${user.username} joined room ${roomId}`);
             }
             catch (error) {
+                const errorMessage = error instanceof Error ? error.message : "Failed to join room";
                 socket.emit("error", {
-                    message: error.message || "Failed to join room",
+                    message: errorMessage,
                     code: "JOIN_ROOM_ERROR",
                 });
             }
@@ -253,8 +254,9 @@ function initializeSocket(server) {
                 console.log(`User ${user.username} found a SET in room ${user.roomId}`);
             }
             catch (error) {
+                const errorMessage = error instanceof Error ? error.message : "Failed to process card selection";
                 socket.emit("error", {
-                    message: error.message || "Failed to process card selection",
+                    message: errorMessage,
                     code: "SELECTION_ERROR",
                 });
             }
@@ -266,7 +268,7 @@ function initializeSocket(server) {
                     return;
                 }
                 console.log(`User ${user.username} reconnecting to room ${roomId}`);
-                const recoveredState = await gameService.recoverGameState(roomId, user.userId);
+                const recoveredState = await gameService.recoverGameState(roomId);
                 if (recoveredState) {
                     socket.join(roomId);
                     user.roomId = roomId;
@@ -294,9 +296,10 @@ function initializeSocket(server) {
                 }
             }
             catch (error) {
+                const errorMessage = error instanceof Error ? error.message : "Failed to reconnect";
                 console.error("Error during reconnection:", error);
                 socket.emit("error", {
-                    message: error.message || "Failed to reconnect",
+                    message: errorMessage,
                     code: "RECONNECT_ERROR",
                 });
             }

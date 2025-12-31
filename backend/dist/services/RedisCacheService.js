@@ -21,7 +21,7 @@ class RedisCacheService {
             await client.setex(key, GAME_STATE_TTL, serialized);
             return true;
         }
-        catch (error) {
+        catch {
             return false;
         }
     }
@@ -41,7 +41,7 @@ class RedisCacheService {
             gameState.updatedAt = new Date(gameState.updatedAt);
             return gameState;
         }
-        catch (error) {
+        catch {
             return null;
         }
     }
@@ -55,7 +55,7 @@ class RedisCacheService {
             await client.del(key);
             return true;
         }
-        catch (error) {
+        catch {
             return false;
         }
     }

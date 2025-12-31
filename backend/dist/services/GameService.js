@@ -25,7 +25,7 @@ class GameService {
         if (!room) {
             try {
                 room = await gameRoomRepo.create(roomId, {
-                    lobby_settings: settings || null,
+                    lobby_settings: settings,
                 });
             }
             catch (err) {
@@ -171,7 +171,6 @@ class GameService {
                 console.error("Error saving move:", err);
             }
         }
-        const previousBoard = [...gameState.board];
         gameState.board = gameState.board.filter((card) => !cardIds.includes(card.id));
         while (gameState.board.length < 12 && gameState.deck.length > 0) {
             const newCard = gameState.deck.pop();
@@ -311,7 +310,7 @@ class GameService {
             console.error("Error removing player from room:", err);
         }
     }
-    async recoverGameState(roomId, userId) {
+    async recoverGameState(roomId) {
         try {
             const cachedState = await this.getGame(roomId);
             if (cachedState) {

@@ -40,15 +40,16 @@ router.post("/register", (0, validation_1.validate)(auth_1.registerSchema), asyn
     }
     catch (err) {
         console.error("Registration error:", err);
-        if (err.code === "23505") {
+        if (err && typeof err === "object" && "code" in err && err.code === "23505") {
             return res.status(409).json({
                 error: "User already exists",
                 message: "Email is already registered",
             });
         }
+        const errorMessage = err instanceof Error ? err.message : "Internal server error";
         res.status(500).json({
             error: "Registration failed",
-            message: err.message || "Internal server error",
+            message: errorMessage,
         });
     }
 });
@@ -85,9 +86,10 @@ router.post("/login", (0, validation_1.validate)(auth_1.loginSchema), async (req
     }
     catch (err) {
         console.error("Login error : ", err);
+        const errorMessage = err instanceof Error ? err.message : "Internal server error";
         res.status(500).json({
             error: "Login failed",
-            message: err.message || "Internal server error",
+            message: errorMessage,
         });
     }
 });

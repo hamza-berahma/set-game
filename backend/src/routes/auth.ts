@@ -53,9 +53,10 @@ router.post("/register", validate(registerSchema), async (req: Request, res: Res
             });
         }
 
+        const errorMessage = err instanceof Error ? err.message : "Internal server error";
         res.status(500).json({
             error: "Registration failed",
-            message: err.message || "Internal server error",
+            message: errorMessage,
         });
     }
 });

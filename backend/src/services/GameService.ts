@@ -1,5 +1,5 @@
 import { GameState, Card, CardSelectionResult } from "../types/game";
-import { generateDeck, shuffleDeck, findValidSets } from "../utils/game";
+import { generateDeck, shuffleDeck, findValidSets, isValidSet } from "../utils/game";
 import { RedisCacheService } from "./RedisCacheService";
 import { GameRoomRepository } from "../repositories/GameRoomRepository";
 import { MatchRepository } from "../repositories/MatchRepository";
@@ -30,7 +30,7 @@ export class GameService {
         if (!room) {
             try {
                 room = await gameRoomRepo.create(roomId, {
-                    lobby_settings: settings || null,
+                    lobby_settings: settings,
                 });
             } catch (err) {
                 console.error("Error creating game room:", err);

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticate = authenticate;
 const jwt_1 = require("../utils/jwt");
+/* eslint-enable @typescript-eslint/no-namespace */
 function authenticate(req, res, next) {
     try {
         const authHeader = req.headers.authorization;
@@ -24,9 +25,10 @@ function authenticate(req, res, next) {
         next();
     }
     catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Invalid or expired token";
         return res.status(401).json({
             error: "Unauthorized",
-            message: err.message || "Invalid or expired token",
+            message: errorMessage,
         });
     }
 }

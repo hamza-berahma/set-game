@@ -21,8 +21,9 @@ class EventLogService {
                  VALUES ($1, $2, $3, $4, $5)`, [matchId || null, roomId || null, userIdValue, eventType, eventDataJson]);
         }
         catch (error) {
-            if (error?.code !== '42P01') {
-                console.error("Error logging event:", error?.message || error);
+            if (error && typeof error === "object" && "code" in error && error.code !== '42P01') {
+                const errorMessage = "message" in error && typeof error.message === "string" ? error.message : String(error);
+                console.error("Error logging event:", errorMessage);
             }
         }
     }

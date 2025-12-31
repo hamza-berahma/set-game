@@ -16,7 +16,7 @@ const socket_1 = require("./socket/socket");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 const httpServer = (0, http_1.createServer)(app);
-const io = (0, socket_1.initializeSocket)(httpServer);
+(0, socket_1.initializeSocket)(httpServer);
 const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
 app.use((0, cors_1.default)({
     origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim()),
@@ -41,7 +41,7 @@ app.get("/users", async (req, res) => {
         res.status(500).send("Database had and error");
     }
 });
-app.use((err, req, res, next) => {
+app.use((err, _req, res) => {
     console.error("Error : ", err);
     res.status(500).json({
         error: "internal server error",

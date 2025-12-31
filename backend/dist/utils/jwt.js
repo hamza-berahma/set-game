@@ -18,7 +18,7 @@ function verifyToken(token) {
     try {
         return jsonwebtoken_1.default.verify(token, JWT_SECRET);
     }
-    catch (err) {
+    catch {
         throw new Error("Invalid/Expired token");
     }
 }
