@@ -19,8 +19,16 @@ class EventLogService {
             }
             // Store roomId as-is (can be UUID or custom string)
             const roomIdValue = roomId || null;
+            // Validate matchId is a UUID before inserting
+            let matchIdValue = null;
+            if (matchId) {
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(matchId)) {
+                    matchIdValue = matchId;
+                }
+            }
             await database_1.default.query(`INSERT INTO game_event_log (match_id, room_id, user_id, event_type, event_data)
-                 VALUES ($1, $2, $3, $4, $5)`, [matchId || null, roomIdValue, userIdValue, eventType, eventDataJson]);
+                 VALUES ($1, $2, $3, $4, $5)`, [matchIdValue, roomIdValue, userIdValue, eventType, eventDataJson]);
         }
         catch (error) {
             if (error && typeof error === "object" && "code" in error && error.code !== '42P01') {

@@ -148,11 +148,12 @@ function initializeSocket(server) {
                         roomName: settings?.roomName,
                     });
                     await gameService.addPlayerToRoom(roomId, user.userId);
-                    await eventLogService.logGameStarted(roomId, gameState.matchId || roomId);
-                    if (settings?.timerDuration && settings.timerDuration > 0) {
-                        const matchId = gameState.matchId || roomId;
-                        console.log(`Starting timer for room ${roomId}, match ${matchId}, duration: ${settings.timerDuration}s`);
-                        await timerService.startTimer(roomId, matchId, settings.timerDuration);
+                    if (gameState.matchId) {
+                        await eventLogService.logGameStarted(roomId, gameState.matchId);
+                    }
+                    if (settings?.timerDuration && settings.timerDuration > 0 && gameState.matchId) {
+                        console.log(`Starting timer for room ${roomId}, match ${gameState.matchId}, duration: ${settings.timerDuration}s`);
+                        await timerService.startTimer(roomId, gameState.matchId, settings.timerDuration);
                     }
                     const playWithBots = settings?.playWithBots !== false;
                     console.log(`Play with bots: ${playWithBots} (settings:`, settings, ')');
@@ -171,7 +172,7 @@ function initializeSocket(server) {
                     await gameService.updateGameState(roomId, gameState);
                     await gameService.addPlayerToRoom(roomId, user.userId);
                 }
-                await eventLogService.logPlayerJoined(roomId, user.userId, gameState.matchId || roomId);
+                await eventLogService.logPlayerJoined(roomId, user.userId, gameState.matchId || undefined);
                 socket.to(roomId).emit("player:joined", {
                     roomId,
                     playerId: user.userId,
@@ -230,7 +231,7 @@ function initializeSocket(server) {
                     });
                 }
                 await gameService.removePlayerFromRoom(user.roomId, user.userId);
-                await eventLogService.logPlayerLeft(user.roomId, user.userId, gameState?.matchId || user.roomId);
+                await eventLogService.logPlayerLeft(user.roomId, user.userId, gameState?.matchId || undefined);
                 console.log(`User ${user.username} left room ${user.roomId}`);
                 user.roomId = undefined;
             }
@@ -262,10 +263,12 @@ function initializeSocket(server) {
                     return;
                 }
                 const updatedGameState = await gameService.getGame(user.roomId);
-                const matchId = updatedGameState?.matchId || user.roomId;
-                await eventLogService.logSetFound(user.roomId, matchId, user.userId, cardIds, result.score || 0);
-                const offsetMs = Date.now() - (currentGameState.createdAt.getTime());
-                await eventLogService.logMove(user.roomId, matchId, user.userId, cardIds, offsetMs);
+                const matchId = updatedGameState?.matchId;
+                if (matchId) {
+                    await eventLogService.logSetFound(user.roomId, matchId, user.userId, cardIds, result.score || 0);
+                    const offsetMs = Date.now() - (currentGameState.createdAt.getTime());
+                    await eventLogService.logMove(user.roomId, matchId, user.userId, cardIds, offsetMs);
+                }
                 io.to(user.roomId).emit("set:found", {
                     roomId: user.roomId,
                     playerId: user.userId,
@@ -285,7 +288,9 @@ function initializeSocket(server) {
                     });
                     if (gameState.status === "finished") {
                         timerService.stopTimer(user.roomId);
-                        await eventLogService.logGameEnded(user.roomId, gameState.matchId || user.roomId, gameState.scores);
+                        if (gameState.matchId) {
+                            await eventLogService.logGameEnded(user.roomId, gameState.matchId, gameState.scores);
+                        }
                         io.to(user.roomId).emit("game:ended", {
                             roomId: user.roomId,
                             scores: gameState.scores,

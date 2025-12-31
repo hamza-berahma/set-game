@@ -34,8 +34,11 @@ class GameService {
         }
         let matchId;
         try {
+            if (!room) {
+                throw new Error("Room not found or could not be created");
+            }
             const match = await matchRepo.create({
-                room_id: room?.room_id || roomId,
+                room_id: room.room_id,
                 deck_seed: { shuffled: true },
                 timer_duration_seconds: settings?.timerDuration || null,
             });
@@ -230,7 +233,7 @@ class GameService {
                     // Clear current_match_id when game ends
                     const room = await gameRoomRepo.findByRoomId(roomId);
                     if (room) {
-                        await gameRoomRepo.updateCurrentMatch(room.room_id, null);
+                        await gameRoomRepo.updateCurrentMatch(roomId, null);
                     }
                 }
                 catch (err) {

@@ -67,25 +67,39 @@ export class GameRoomRepository {
 
     async create(roomId: string, data?: Partial<CreateGameRoomData>): Promise<GameRoom> {
         try {
+            // Generate UUID for room_id (database requires UUID)
+            const { v4: uuidv4 } = await import("uuid");
+            const roomUuid = uuidv4();
+            
+            // Use provided room_code or extract from roomId, or generate new one
             let roomCode = data?.room_code;
             if (!roomCode) {
-                let attempts = 0;
-                do {
-                    roomCode = this.generateRoomCode();
-                    const existing = await this.findByRoomCode(roomCode);
-                    if (!existing) break;
-                    attempts++;
-                    if (attempts > 10) {
-                        roomCode = Date.now().toString(36).substring(0, 6).toUpperCase();
-                        break;
-                    }
-                } while (true);
+                // If roomId looks like a room code (short alphanumeric), use it
+                if (/^[A-Z0-9]{6}$/i.test(roomId)) {
+                    roomCode = roomId.toUpperCase();
+                } else if (roomId.startsWith("room-")) {
+                    // Extract code from "room-XXXXXX" format
+                    roomCode = roomId.replace("room-", "").toUpperCase();
+                } else {
+                    // Generate new room code
+                    let attempts = 0;
+                    do {
+                        roomCode = this.generateRoomCode();
+                        const existing = await this.findByRoomCode(roomCode);
+                        if (!existing) break;
+                        attempts++;
+                        if (attempts > 10) {
+                            roomCode = Date.now().toString(36).substring(0, 6).toUpperCase();
+                            break;
+                        }
+                    } while (true);
+                }
             }
 
             const result = await pool.query(
                 `INSERT INTO game_rooms (room_id, room_code, lobby_settings) 
                  VALUES ($1, $2, $3) RETURNING *`,
-                [roomId, roomCode, JSON.stringify(data?.lobby_settings || null)]
+                [roomUuid, roomCode, JSON.stringify(data?.lobby_settings || null)]
             );
             return result.rows[0];
         } catch (err) {
@@ -96,9 +110,24 @@ export class GameRoomRepository {
 
     async updateCurrentMatch(roomId: string, matchId: string | null): Promise<GameRoom | null> {
         try {
+            // roomId can be UUID or room_code, find the room first
+            const room = await this.findByRoomId(roomId);
+            if (!room) {
+                return null;
+            }
+            
+            // Validate matchId is a UUID if provided
+            if (matchId) {
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (!uuidRegex.test(matchId)) {
+                    console.error(`Invalid matchId format: ${matchId}`);
+                    return null;
+                }
+            }
+            
             const result = await pool.query(
                 `UPDATE game_rooms SET current_match_id = $1 WHERE room_id = $2 RETURNING *`,
-                [matchId, roomId]
+                [matchId, room.room_id]
             );
             return result.rows[0] || null;
         } catch (err) {

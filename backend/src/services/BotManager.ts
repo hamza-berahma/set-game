@@ -134,15 +134,17 @@ export class BotManager {
 
             if (result.success) {
                 const updatedStateAfterMove = await this.gameService.getGame(botInstance.roomId);
-                const matchId = updatedStateAfterMove?.matchId || botInstance.roomId;
+                const matchId = updatedStateAfterMove?.matchId;
                 
-                await this.eventLogService.logSetFound(
-                    botInstance.roomId,
-                    matchId,
-                    botId,
-                    cardIds,
-                    result.score || 0
-                );
+                if (matchId) {
+                    await this.eventLogService.logSetFound(
+                        botInstance.roomId,
+                        matchId,
+                        botId,
+                        cardIds,
+                        result.score || 0
+                    );
+                }
 
                 if (this.io) {
                     this.io.to(botInstance.roomId).emit("set:found", {
@@ -164,11 +166,10 @@ export class BotManager {
                             players: updatedState.players,
                         });
 
-                        if (updatedState.status === "finished") {
-                            const matchId = updatedState.matchId || botInstance.roomId;
+                        if (updatedState.status === "finished" && updatedState.matchId) {
                             await this.eventLogService.logGameEnded(
                                 botInstance.roomId,
-                                matchId,
+                                updatedState.matchId,
                                 updatedState.scores
                             );
                             
