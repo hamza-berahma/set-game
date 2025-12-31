@@ -105,6 +105,10 @@ export default function GameRoomPage() {
             onGameStateUpdate: (state: GameState) => {
                 setGameState(state);
                 setIsProcessing(false);
+                // Initialize timer if game has timer but timer hasn't started yet
+                if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && timeRemaining === null) {
+                    setTimeRemaining(roomSettings.timerDuration);
+                }
                 state.players.forEach(playerId => {
                     if (!playerNames[playerId] && playerId !== user?.user_id && playerId.startsWith('bot-')) {
                         setPlayerNames(prev => ({
