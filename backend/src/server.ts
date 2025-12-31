@@ -125,17 +125,21 @@ app.use((req: Request, res: Response, next: express.NextFunction) => {
 });
 
 // Explicit OPTIONS handler for CORS preflight (before JSON parser)
-app.options('*', (req: Request, res: Response) => {
-    const origin = req.headers.origin;
-    console.log(`OPTIONS preflight - Origin: ${origin}`);
-    if (origin) {
-        res.header('Access-Control-Allow-Origin', origin);
-        res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-        res.header('Access-Control-Max-Age', '86400');
+// Express 5 doesn't support '*' as route path, so handle OPTIONS in middleware
+app.use((req: Request, res: Response, next: express.NextFunction) => {
+    if (req.method === 'OPTIONS') {
+        const origin = req.headers.origin;
+        console.log(`OPTIONS preflight - Origin: ${origin}`);
+        if (origin) {
+            res.header('Access-Control-Allow-Origin', origin);
+            res.header('Access-Control-Allow-Credentials', 'true');
+            res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+            res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+            res.header('Access-Control-Max-Age', '86400');
+        }
+        return res.sendStatus(204);
     }
-    res.sendStatus(204);
+    next();
 });
 
 app.use(express.json());
