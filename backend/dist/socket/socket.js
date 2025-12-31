@@ -19,7 +19,10 @@ const matchRepo = new MatchRepository_1.MatchRepository();
 const matchResultRepo = new MatchResultRepository_1.MatchResultRepository();
 function initializeSocket(server) {
     const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
-    const corsOrigins = corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim());
+    // Normalize CORS origins: trim whitespace and remove trailing slashes
+    const corsOrigins = corsOrigin === '*'
+        ? '*'
+        : corsOrigin.split(',').map(origin => origin.trim().replace(/\/+$/, ''));
     const io = new socket_io_1.Server(server, {
         cors: {
             origin: corsOrigins,
@@ -29,14 +32,19 @@ function initializeSocket(server) {
     });
     // Initialize Redis adapter for horizontal scaling
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+    let hasLoggedRedisWarning = false;
     try {
         const pubClient = (0, redis_1.createClient)({ url: redisUrl });
         const subClient = pubClient.duplicate();
         pubClient.on("error", (err) => {
-            console.warn("Redis pub client error:", err.message);
+            if (!hasLoggedRedisWarning) {
+                console.warn("Redis not available - using in-memory Socket.IO adapter (single instance only)");
+                console.warn("To enable horizontal scaling, add Redis service and link REDIS_URL in Railway");
+                hasLoggedRedisWarning = true;
+            }
         });
         subClient.on("error", (err) => {
-            console.warn("Redis sub client error:", err.message);
+            // Already logged by pubClient
         });
         Promise.all([pubClient.connect(), subClient.connect()])
             .then(() => {

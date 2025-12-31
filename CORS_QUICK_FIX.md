@@ -6,15 +6,19 @@
 
 ## Fix CORS Error - 3 Steps
 
-### Step 1: Set CORS_ORIGIN in Backend
+### Step 1: Set Environment Variables in Backend
 
 1. Go to Railway Dashboard
 2. Select **Backend Service** (`set-game-production-a2b7`)
 3. Go to **Variables** tab
-4. Add or update:
+4. Add or update these variables:
    ```
+   NODE_ENV=production
    CORS_ORIGIN=https://capable-kindness-production-f5a2.up.railway.app
    ```
+   **Important:** 
+   - No trailing slash in CORS_ORIGIN (the code automatically removes it, but best to set it correctly)
+   - Must include `https://`
 5. **Save** - Railway will auto-redeploy
 
 ### Step 2: Verify Backend Logs
@@ -48,7 +52,7 @@ CORS_ORIGIN=capable-kindness-production-f5a2.up.railway.app
 ```
 CORS_ORIGIN=https://capable-kindness-production-f5a2.up.railway.app/
 ```
-(Trailing slash)
+(Trailing slash - will be auto-removed, but best to set correctly)
 
 ✅ **Correct:**
 ```
