@@ -107,6 +107,26 @@ else {
         maxAge: 86400,
     }));
 }
+// Request logging middleware (for debugging)
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS' || req.path.startsWith('/api')) {
+        console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
+    }
+    next();
+});
+// Explicit OPTIONS handler for CORS preflight (before JSON parser)
+app.options('*', (req, res) => {
+    const origin = req.headers.origin;
+    console.log(`OPTIONS preflight - Origin: ${origin}`);
+    if (origin) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        res.header('Access-Control-Max-Age', '86400');
+    }
+    res.sendStatus(204);
+});
 app.use(express_1.default.json());
 app.use("/api/auth", auth_1.default);
 app.use("/api", profile_1.default);
