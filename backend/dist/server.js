@@ -170,20 +170,26 @@ app.get("/users", async (req, res) => {
         res.status(500).send("Database had and error");
     }
 });
-// Error handler - must be last
+// Error handler - must be last (4 parameters required for Express error handler)
 app.use((err, _req, res, _next) => {
+    const error = err instanceof Error ? err : new Error(String(err));
     // CORS errors should be handled by cors middleware, but just in case
-    if (err.message && err.message.includes('CORS')) {
-        console.error("CORS error:", err.message);
+    if (error.message && error.message.includes('CORS')) {
+        console.error("CORS error:", error.message);
         return res.status(403).json({
             error: "CORS error",
-            message: err.message,
+            message: error.message,
         });
     }
-    console.error("Error:", err);
+    console.error("Error:", error.message);
+    console.error("Stack:", error.stack);
+    // Don't send error details in production
+    const message = process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : error.message;
     res.status(500).json({
         error: "internal server error",
-        message: err.message,
+        message: message,
     });
 });
 // Initialize Redis (non-blocking)
