@@ -47,40 +47,45 @@ const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'product
 const corsOrigins = corsOrigin === '*'
     ? '*'
     : corsOrigin.split(',').map(origin => origin.trim().replace(/\/+$/, ''));
-const corsOriginsList = corsOrigin === '*' ? 'all origins (*)' : corsOrigins.join(', ');
-console.log(`CORS Configuration: Allowing ${corsOriginsList}`);
-app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) {
-            return callback(null, true);
-        }
-        if (corsOrigin === '*') {
-            return callback(null, true);
-        }
-        // Normalize incoming origin (remove trailing slashes, trim)
-        const normalizedOrigin = origin.trim().replace(/\/+$/, '');
-        const allowedOrigins = corsOrigins;
-        // Check if normalized origin matches any allowed origin
-        const matchedOrigin = allowedOrigins.find(allowed => {
-            const normalizedAllowed = allowed.trim().replace(/\/+$/, '');
-            return normalizedAllowed === normalizedOrigin;
-        });
-        if (matchedOrigin) {
-            // Return the matched origin (use the original allowed origin, not normalized)
-            return callback(null, true);
-        }
-        // Debug logging
-        console.warn(`❌ CORS blocked origin: "${origin}"`);
-        console.warn(`   Normalized to: "${normalizedOrigin}"`);
-        console.warn(`   Allowed origins: ${allowedOrigins.map(o => `"${o}"`).join(', ')}`);
-        console.warn(`   Normalized allowed: ${allowedOrigins.map(o => `"${o.trim().replace(/\/+$/, '')}"`).join(', ')}`);
-        callback(new Error(`CORS: Origin "${origin}" not allowed`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+if (corsOrigin === '*') {
+    console.log('CORS Configuration: Allowing all origins (*)');
+    app.use((0, cors_1.default)({
+        origin: true, // Allow all origins
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    }));
+}
+else {
+    const allowedList = corsOrigins.join(', ');
+    console.log(`CORS Configuration: Allowing ${allowedList}`);
+    app.use((0, cors_1.default)({
+        origin: (origin, callback) => {
+            // Allow requests with no origin
+            if (!origin) {
+                return callback(null, true);
+            }
+            // Normalize incoming origin
+            const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+            const allowedOrigins = corsOrigins;
+            // Check if normalized origin matches any allowed origin
+            const matched = allowedOrigins.some(allowed => {
+                const normalizedAllowed = allowed.trim().replace(/\/+$/, '');
+                return normalizedAllowed === normalizedOrigin;
+            });
+            if (matched) {
+                return callback(null, true);
+            }
+            // Debug logging
+            console.warn(`CORS blocked origin: "${origin}"`);
+            console.warn(`Allowed origins: ${allowedList}`);
+            callback(new Error(`CORS: Origin not allowed`));
+        },
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    }));
+}
 app.use(express_1.default.json());
 app.use("/api/auth", auth_1.default);
 app.use("/api", profile_1.default);
@@ -124,8 +129,17 @@ app.get("/users", async (req, res) => {
         res.status(500).send("Database had and error");
     }
 });
-app.use((err, _req, res) => {
-    console.error("Error : ", err);
+// Error handler - must be last
+app.use((err, _req, res, _next) => {
+    // CORS errors should be handled by cors middleware, but just in case
+    if (err.message && err.message.includes('CORS')) {
+        console.error("CORS error:", err.message);
+        return res.status(403).json({
+            error: "CORS error",
+            message: err.message,
+        });
+    }
+    console.error("Error:", err);
     res.status(500).json({
         error: "internal server error",
         message: err.message,
