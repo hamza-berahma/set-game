@@ -78,16 +78,133 @@ Best for: Single server deployments, development, small-scale production
 
 Best for: Quick deployment, managed infrastructure
 
-**Setup:**
-1. Create Railway account
-2. Create PostgreSQL service
-3. Create Redis service
-4. Deploy backend (set root directory to `backend`)
-5. Deploy frontend (set root directory to `frontend`)
-6. Configure environment variables
-7. Run database migrations
+**Prerequisites:**
+- Railway account (sign up at [railway.app](https://railway.app))
+- GitHub repository connected to Railway
 
-See Railway configuration files: `backend/railway.json`, `frontend/railway.json`
+**Step-by-Step Setup:**
+
+#### 1. Create New Project
+- Click "New Project" in Railway dashboard
+- Select "Deploy from GitHub repo"
+- Choose your repository
+
+#### 2. Add PostgreSQL Service
+- Click "+ New" → "Database" → "Add PostgreSQL"
+- Railway will automatically create a PostgreSQL instance
+- Note the `DATABASE_URL` (automatically set as environment variable)
+
+#### 3. Add Redis Service (Optional but Recommended)
+- Click "+ New" → "Database" → "Add Redis"
+- Railway will create a Redis instance
+- Note the `REDIS_URL` (automatically set as environment variable)
+
+#### 4. Deploy Backend Service
+- Click "+ New" → "GitHub Repo" → Select your repository
+- In service settings:
+  - **Root Directory**: Set to `backend`
+  - **Build Command**: (auto-detected from `nixpacks.toml`)
+  - **Start Command**: `node dist/server.js`
+- Railway will automatically detect Node.js and build using Nixpacks
+
+#### 5. Configure Backend Environment Variables
+In the backend service settings, add/verify these variables:
+
+**Required:**
+- `NODE_ENV=production`
+- `PORT` (Railway sets this automatically, but you can override)
+- `DATABASE_URL` (automatically set from PostgreSQL service - use "Add Reference")
+- `JWT_SECRET` (generate a strong random string, min 32 characters)
+  ```bash
+  # Generate a secure JWT secret
+  openssl rand -base64 32
+  ```
+
+**Optional:**
+- `REDIS_URL` (automatically set from Redis service - use "Add Reference")
+- `CORS_ORIGIN` (set to your frontend URL after deployment, e.g., `https://your-frontend.railway.app`)
+- `JWT_EXPIRES_IN` (default: `24h`)
+- `DB_MAX_CONNECTIONS` (default: `20`)
+
+**To add variables:**
+1. Go to backend service → "Variables" tab
+2. Click "+ New Variable"
+3. For service references (DATABASE_URL, REDIS_URL), click "Add Reference" and select the service
+
+#### 6. Run Database Migrations
+After backend is deployed, run migrations:
+
+**Option A: Using Railway CLI**
+```bash
+# Install Railway CLI
+npm i -g @railway/cli
+
+# Login
+railway login
+
+# Link to your project
+railway link
+
+# Run migrations
+railway run psql $DATABASE_URL -f migrations/001_initial_schema.sql
+railway run psql $DATABASE_URL -f migrations/002_room_settings_and_logging.sql
+```
+
+**Option B: Using Railway Shell**
+1. Go to backend service → "Deployments" → Click on a deployment
+2. Click "Shell" tab
+3. Run:
+```bash
+psql $DATABASE_URL -f migrations/001_initial_schema.sql
+psql $DATABASE_URL -f migrations/002_room_settings_and_logging.sql
+```
+
+#### 7. Deploy Frontend Service
+- Click "+ New" → "GitHub Repo" → Select your repository
+- In service settings:
+  - **Root Directory**: Set to `frontend`
+  - **Build Command**: (auto-detected from `nixpacks.toml`)
+  - **Start Command**: `npx serve -s dist -l $PORT`
+
+#### 8. Configure Frontend Environment Variables
+In the frontend service settings, add:
+
+**Required:**
+- `VITE_API_URL` (set to your backend URL, e.g., `https://your-backend.railway.app`)
+
+**To find backend URL:**
+1. Go to backend service → "Settings" → "Networking"
+2. Generate a public domain or use the provided Railway domain
+3. Copy the URL (e.g., `https://backend-production-xxxx.up.railway.app`)
+
+**Important:** Frontend environment variables must be prefixed with `VITE_` and are embedded at build time. After changing `VITE_API_URL`, trigger a new deployment.
+
+#### 9. Generate Public Domains
+- Backend: Go to backend service → "Settings" → "Networking" → "Generate Domain"
+- Frontend: Go to frontend service → "Settings" → "Networking" → "Generate Domain"
+
+#### 10. Update CORS_ORIGIN
+After getting frontend URL, update backend's `CORS_ORIGIN` variable:
+- Go to backend service → "Variables"
+- Update `CORS_ORIGIN` to your frontend URL (e.g., `https://frontend-production-xxxx.up.railway.app`)
+- Redeploy backend (Railway auto-redeploys on variable change)
+
+#### 11. Verify Deployment
+- Backend health: Visit `https://your-backend.railway.app/health`
+- Frontend: Visit your frontend URL
+- Check logs in Railway dashboard for any errors
+
+**Railway Configuration Files:**
+- `backend/railway.json` - Railway-specific backend config
+- `frontend/railway.json` - Railway-specific frontend config
+- `backend/nixpacks.toml` - Build configuration for backend
+- `frontend/nixpacks.toml` - Build configuration for frontend
+
+**Troubleshooting Railway Deployment:**
+- **Build fails with "tsc: not found"**: Ensure `postinstall` script is removed from `package.json` (Nixpacks handles builds)
+- **Backend can't connect to database**: Verify `DATABASE_URL` is set via "Add Reference" to PostgreSQL service
+- **WebSocket not working**: Ensure `CORS_ORIGIN` includes your frontend URL
+- **Frontend shows connection errors**: Verify `VITE_API_URL` matches your backend URL exactly
 
 ### Option 3: VPS with Docker (Traditional)
 

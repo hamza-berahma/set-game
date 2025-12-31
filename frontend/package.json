@@ -10,7 +10,6 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "postinstall": "npm run build",
     "start": "npx serve -s dist -l $PORT"
   },
   "dependencies": {
