@@ -39,6 +39,9 @@ RUN npm ci --omit=dev
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# Copy migrations directory (needed for migration script)
+COPY migrations ./migrations
+
 # Copy wait script
 COPY wait-for.sh ./
 RUN chmod +x wait-for.sh
