@@ -113,6 +113,7 @@ if (corsOrigin === '*') {
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         exposedHeaders: ['Content-Length', 'Content-Type'],
         maxAge: 86400,
+        preflightContinue: false, // Let our middleware handle OPTIONS
     }));
 }
 
@@ -120,24 +121,6 @@ if (corsOrigin === '*') {
 app.use((req: Request, res: Response, next: express.NextFunction) => {
     if (req.method === 'OPTIONS' || req.path.startsWith('/api')) {
         console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
-    }
-    next();
-});
-
-// Explicit OPTIONS handler for CORS preflight (before JSON parser)
-// Express 5 doesn't support '*' as route path, so handle OPTIONS in middleware
-app.use((req: Request, res: Response, next: express.NextFunction) => {
-    if (req.method === 'OPTIONS') {
-        const origin = req.headers.origin;
-        console.log(`OPTIONS preflight - Origin: ${origin}`);
-        if (origin) {
-            res.header('Access-Control-Allow-Origin', origin);
-            res.header('Access-Control-Allow-Credentials', 'true');
-            res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-            res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-            res.header('Access-Control-Max-Age', '86400');
-        }
-        return res.sendStatus(204);
     }
     next();
 });
