@@ -209,6 +209,13 @@ app.use((err: unknown, _req: Request, res: Response, _next: express.NextFunction
 // Initialize Redis (non-blocking)
 initializeRedis();
 
+// Run database migrations on startup (non-blocking)
+import("./scripts/runMigrations").then(({ runMigrations }) => {
+    runMigrations().catch((err) => {
+        console.error("Migration error (non-fatal):", err);
+    });
+});
+
 const port = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
 
 // Add process error handlers (must be before server starts)
