@@ -26,10 +26,22 @@ app.use(express_1.default.json());
 app.use("/api/auth", auth_1.default);
 app.use("/api", profile_1.default);
 app.use("/api/rooms", rooms_1.default);
-app.get("/health", (req, res) => {
-    res.json({
-        status: "ok",
-    });
+app.get("/health", async (_req, res) => {
+    try {
+        // Quick database connectivity check
+        await database_1.default.query("SELECT 1");
+        res.json({
+            status: "ok",
+            timestamp: new Date().toISOString(),
+        });
+    }
+    catch (err) {
+        console.error("Health check failed:", err);
+        res.status(503).json({
+            status: "error",
+            message: "Database connection failed",
+        });
+    }
 });
 app.get("/users", async (req, res) => {
     try {
@@ -49,7 +61,8 @@ app.use((err, _req, res) => {
     });
 });
 (0, redis_1.initializeRedis)();
-httpServer.listen(PORT, () => {
-    console.log(`Server listening at port ${PORT}`);
+const port = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
+httpServer.listen(port, "0.0.0.0", () => {
+    console.log(`Server listening on 0.0.0.0:${port}`);
     console.log(`Socket.IO server initialized`);
 });
