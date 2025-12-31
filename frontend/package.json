@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "start": "node server.js"
+    "start": "node server.cjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
