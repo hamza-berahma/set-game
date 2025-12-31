@@ -168,7 +168,9 @@ export default function GameRoomPage() {
             },
             onTimerUpdate: (data) => {
                 // Update timer display with remaining time from backend
-                setTimeRemaining(data.remaining);
+                if (data.remaining !== undefined && data.remaining !== null) {
+                    setTimeRemaining(data.remaining);
+                }
             },
             onTimerEnd: () => {
                 setTimeRemaining(0);
@@ -186,7 +188,7 @@ export default function GameRoomPage() {
                 setIsProcessing(false);
             },
         });
-    }, [user, toast, addEvent, playerNames, gameEndModal]);
+    }, [user, toast, addEvent, playerNames, gameEndModal, roomSettings, timeRemaining]);
 
     const handleCardSelect = (cardIds: string[]) => {
         if (!roomId || !socket || !isConnected) {
@@ -282,24 +284,24 @@ export default function GameRoomPage() {
 
                     {gameState && gameState.players.length > 0 && (
                         <div>
-                            {timeRemaining !== null && (
+                            {(timeRemaining !== null || (roomSettings?.timerDuration && roomSettings.timerDuration > 0)) && (
                                 <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
                                     <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Timer</h3>
                                     <div className={`border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
-                                        timeRemaining < 30 ? 'bg-set-red' : 
-                                        timeRemaining < 60 ? 'bg-gold' : 'bg-white'
+                                        (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 30 ? 'bg-set-red' : 
+                                        (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 60 ? 'bg-gold' : 'bg-white'
                                     }`}>
                                         <div className="flex items-center justify-between mb-2">
                                             <span className={`text-sm uppercase tracking-wider font-semibold ${
-                                                timeRemaining < 30 ? 'text-white' : 'text-black'
+                                                (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 30 ? 'text-white' : 'text-black'
                                             }`}>
                                                 Time Remaining
                                             </span>
                                         </div>
                                         <div className={`text-2xl font-bold ${
-                                            timeRemaining < 30 ? 'text-white' : 'text-black'
+                                            (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 30 ? 'text-white' : 'text-black'
                                         }`}>
-                                            {formatTime(timeRemaining)}
+                                            {formatTime(timeRemaining ?? roomSettings?.timerDuration ?? 0)}
                                         </div>
                                     </div>
                                 </div>
