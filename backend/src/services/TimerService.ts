@@ -69,6 +69,8 @@ export class TimerService {
         }, 1000);
 
         this.timers.set(roomId, timerInfo);
+        
+        console.log(`Timer started for room ${roomId}, match ${matchId}, duration: ${durationSeconds}s`);
 
         this.broadcastTimerUpdate(roomId, timerInfo);
     }
@@ -133,10 +135,6 @@ export class TimerService {
                 remaining,
                 total: timerInfo.duration,
             });
-            // Debug log every 10 seconds
-            if (remaining % 10 === 0) {
-                console.log(`Timer update for room ${roomId}: ${remaining}s remaining`);
-            }
         }
     }
 
@@ -153,11 +151,15 @@ export class TimerService {
             return;
         }
 
+        // Calculate elapsed time to adjust startedAt
+        const elapsed = durationSeconds - remaining;
+        const adjustedStartedAt = new Date(Date.now() - (elapsed * 1000));
+
         const timerInfo: TimerInfo = {
             matchId,
             roomId,
-            duration: remaining,
-            startedAt: new Date(),
+            duration: durationSeconds,
+            startedAt: adjustedStartedAt,
             intervalId: null,
         };
 
