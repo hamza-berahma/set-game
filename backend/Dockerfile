@@ -1,4 +1,8 @@
 # Backend Dockerfile
+
+# -----------------------
+# Stage 1: Builder
+# -----------------------
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -7,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
+# Install all dependencies (dev + prod)
 RUN npm ci
 
 # Copy source code
@@ -16,10 +20,12 @@ COPY src ./src
 # Build TypeScript
 RUN npm run build
 
-# Production stage
+# -----------------------
+# Stage 2: Production
+# -----------------------
 FROM node:20-alpine
 
-# Install netcat for wait script (update package index first to avoid DNS issues)
+# Install netcat for wait script
 RUN apk update && apk add --no-cache netcat-openbsd
 
 WORKDIR /app
@@ -27,8 +33,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies only
-RUN npm ci --only=production
+# Install only production dependencies
+RUN npm ci --omit=dev
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
@@ -40,6 +46,5 @@ RUN chmod +x wait-for.sh
 # Expose port
 EXPOSE 5000
 
-# Start server (wait for postgres, then start server - redis connection is handled gracefully)
+# Start server (wait for postgres)
 CMD ["./wait-for.sh", "postgres", "5432", "node", "dist/server.js"]
-
