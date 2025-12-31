@@ -12,11 +12,11 @@ RUN npm ci
 # Copy source code and config
 COPY . .
 
-# Build argument for API URL
+# Build argument for API URL (Railway will pass this as env var)
 ARG VITE_API_URL=http://localhost:5000
 ENV VITE_API_URL=$VITE_API_URL
 
-# Build application
+# Build application (VITE_API_URL will be embedded in the bundle)
 RUN npm run build
 
 # Production stage with Node.js server

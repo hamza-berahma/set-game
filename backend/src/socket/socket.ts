@@ -19,9 +19,12 @@ const matchRepo = new MatchRepository();
 const matchResultRepo = new MatchResultRepository();
 
 export function initializeSocket(server: HTTPServer): SocketIOServer {
+    const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
+    const corsOrigins = corsOrigin === '*' ? '*' : corsOrigin.split(',').map(origin => origin.trim());
+    
     const io = new SocketIOServer(server, {
         cors: {
-            origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+            origin: corsOrigins,
             methods: ["GET", "POST"],
             credentials: true,
         },
