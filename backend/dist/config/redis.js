@@ -15,12 +15,16 @@ function initializeRedis() {
     try {
         const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
         redisClient = new ioredis_1.default(redisUrl, {
-            retryStrategy: () => {
-                return null;
+            retryStrategy: (times) => {
+                // Retry up to 3 times with exponential backoff
+                if (times > 3) {
+                    return null; // Stop retrying
+                }
+                return Math.min(times * 200, 2000); // 200ms, 400ms, 600ms
             },
             maxRetriesPerRequest: null,
             enableReadyCheck: false,
-            connectTimeout: 2000,
+            connectTimeout: 5000, // Increased to 5s for Railway
             lazyConnect: false,
             enableOfflineQueue: false,
         });
@@ -38,7 +42,8 @@ function initializeRedis() {
                 const errMsg = err?.message || String(err) || "";
                 const errName = err?.name || "";
                 if (errName === "AggregateError" || errMsg === "AggregateError") {
-                    console.warn("Redis not available - falling back to in-memory storage. To use Redis: sudo docker-compose -f infrastructure/docker-compose.yml up -d redis");
+                    console.warn("Redis not available - falling back to in-memory storage");
+                    console.warn("To enable Redis: Add Redis service in Railway and link REDIS_URL to backend");
                 }
                 else if (errMsg.includes("ECONNREFUSED") ||
                     errMsg.includes("connect") ||
@@ -46,7 +51,8 @@ function initializeRedis() {
                     errMsg.includes("Connection") ||
                     errMsg === "" ||
                     errMsg.includes("All connection attempts failed")) {
-                    console.warn("Redis not available - falling back to in-memory storage. To use Redis: sudo docker-compose -f infrastructure/docker-compose.yml up -d redis");
+                    console.warn("Redis not available - falling back to in-memory storage");
+                    console.warn("To enable Redis: Add Redis service in Railway and link REDIS_URL to backend");
                 }
                 else {
                     console.error("Redis error:", errMsg || errName);
