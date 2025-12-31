@@ -40,14 +40,8 @@ export class EventLogService {
                 }
             }
 
-            // Convert roomId to UUID if it's a valid UUID string, otherwise null
-            let roomIdValue: string | null = null;
-            if (roomId) {
-                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-                if (uuidRegex.test(roomId)) {
-                    roomIdValue = roomId;
-                }
-            }
+            // Store roomId as-is (can be UUID or custom string)
+            const roomIdValue = roomId || null;
             
             await pool.query(
                 `INSERT INTO game_event_log (match_id, room_id, user_id, event_type, event_data)
