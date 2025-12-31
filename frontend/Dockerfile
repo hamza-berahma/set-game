@@ -24,13 +24,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built files and server script
+# Copy built files, server script, and package.json (needed for Railway)
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server.cjs ./
+COPY --from=builder /app/package.json ./
 
 # Expose port (Railway will set PORT env var)
 EXPOSE 3000
 
-# Start Node.js server
+# Start Node.js server directly (don't use npm)
 CMD ["node", "server.cjs"]
 
