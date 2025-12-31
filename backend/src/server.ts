@@ -54,7 +54,11 @@ const corsOrigins: string[] | '*' = corsOrigin === '*'
 if (corsOrigin === '*') {
     console.log('CORS Configuration: Allowing all origins (*)');
     app.use(cors({
-        origin: true, // Allow all origins
+        origin: (origin, callback) => {
+            // When credentials: true, we must return the actual origin string, not true or *
+            // This allows all origins while still supporting credentials
+            callback(null, origin || '*');
+        },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -81,7 +85,12 @@ if (corsOrigin === '*') {
             });
             
             if (matched) {
-                return callback(null, true);
+                // Return the matched origin (use original from allowed list for consistency)
+                const matchedOrigin = allowedOrigins.find(allowed => {
+                    const normalizedAllowed = allowed.trim().replace(/\/+$/, '');
+                    return normalizedAllowed === normalizedOrigin;
+                });
+                return callback(null, matchedOrigin || normalizedOrigin);
             }
             
             // Debug logging
