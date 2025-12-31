@@ -9,6 +9,7 @@ import { BotManager } from "../services/BotManager";
 import { TimerService } from "../services/TimerService";
 import { MatchRepository } from "../repositories/MatchRepository";
 import { MatchResultRepository } from "../repositories/MatchResultRepository";
+import { GameRoomRepository } from "../repositories/GameRoomRepository";
 import { SocketUser, JoinRoomData, SelectCardsData, SocketError } from "../types/socket";
 
 const gameService = new GameService();
@@ -17,6 +18,7 @@ const botManager = new BotManager(gameService, eventLogService);
 const timerService = new TimerService();
 const matchRepo = new MatchRepository();
 const matchResultRepo = new MatchResultRepository();
+const gameRoomRepo = new GameRoomRepository();
 
 export function initializeSocket(server: HTTPServer): SocketIOServer {
     const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
@@ -101,6 +103,12 @@ export function initializeSocket(server: HTTPServer): SocketIOServer {
                         console.error(`Error saving result for ${playerId}:`, err);
                     }
                 }
+            }
+            
+            // Clear current_match_id when game ends
+            const room = await gameRoomRepo.findByRoomId(roomId);
+            if (room) {
+                await gameRoomRepo.updateCurrentMatch(room.room_id, null);
             }
             
             await gameService.updateGameState(roomId, gameState);

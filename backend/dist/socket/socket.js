@@ -11,12 +11,14 @@ const BotManager_1 = require("../services/BotManager");
 const TimerService_1 = require("../services/TimerService");
 const MatchRepository_1 = require("../repositories/MatchRepository");
 const MatchResultRepository_1 = require("../repositories/MatchResultRepository");
+const GameRoomRepository_1 = require("../repositories/GameRoomRepository");
 const gameService = new GameService_1.GameService();
 const eventLogService = new EventLogService_1.EventLogService();
 const botManager = new BotManager_1.BotManager(gameService, eventLogService);
 const timerService = new TimerService_1.TimerService();
 const matchRepo = new MatchRepository_1.MatchRepository();
 const matchResultRepo = new MatchResultRepository_1.MatchResultRepository();
+const gameRoomRepo = new GameRoomRepository_1.GameRoomRepository();
 function initializeSocket(server) {
     const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
     // Normalize CORS origins: trim whitespace and remove trailing slashes
@@ -90,6 +92,11 @@ function initializeSocket(server) {
                         console.error(`Error saving result for ${playerId}:`, err);
                     }
                 }
+            }
+            // Clear current_match_id when game ends
+            const room = await gameRoomRepo.findByRoomId(roomId);
+            if (room) {
+                await gameRoomRepo.updateCurrentMatch(room.room_id, null);
             }
             await gameService.updateGameState(roomId, gameState);
             await eventLogService.logGameEnded(roomId, matchId, gameState.scores);

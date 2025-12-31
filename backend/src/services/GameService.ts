@@ -177,6 +177,7 @@ export class GameService {
         let moveId: string | null = null;
         if (gameState.matchId) {
             try {
+                // Save moves only for real users (UUIDs), not bots
                 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
                 if (uuidRegex.test(playerId)) {
                     const move = await moveRepo.create({
@@ -239,6 +240,7 @@ export class GameService {
                     const gameDuration = Date.now() - gameState.createdAt.getTime();
 
                     for (const { playerId, score, rank } of sortedPlayers) {
+                        // Only save results for real users (UUIDs), not bots
                         if (uuidRegex.test(playerId)) {
                             try {
                                 await matchResultRepo.upsert({
@@ -252,6 +254,12 @@ export class GameService {
                                 console.error(`Error saving result for ${playerId}:`, err);
                             }
                         }
+                    }
+                    
+                    // Clear current_match_id when game ends
+                    const room = await gameRoomRepo.findByRoomId(roomId);
+                    if (room) {
+                        await gameRoomRepo.updateCurrentMatch(room.room_id, null);
                     }
                 } catch (err) {
                     console.error("Error saving match results:", err);
