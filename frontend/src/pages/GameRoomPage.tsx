@@ -105,10 +105,6 @@ export default function GameRoomPage() {
             onGameStateUpdate: (state: GameState) => {
                 setGameState(state);
                 setIsProcessing(false);
-                // Initialize timer if game has timer but timer hasn't started yet
-                if (roomSettings?.timerDuration && roomSettings.timerDuration > 0 && timeRemaining === null) {
-                    setTimeRemaining(roomSettings.timerDuration);
-                }
                 state.players.forEach(playerId => {
                     if (!playerNames[playerId] && playerId !== user?.user_id && playerId.startsWith('bot-')) {
                         setPlayerNames(prev => ({
@@ -288,24 +284,24 @@ export default function GameRoomPage() {
 
                     {gameState && gameState.players.length > 0 && (
                         <div>
-                            {(timeRemaining !== null || (roomSettings?.timerDuration && roomSettings.timerDuration > 0)) && (
+                            {timeRemaining !== null && (
                                 <div className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 mb-4">
                                     <h3 className="text-lg uppercase tracking-widest mb-4 text-black">Timer</h3>
                                     <div className={`border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
-                                        (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 30 ? 'bg-set-red' : 
-                                        (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 60 ? 'bg-gold' : 'bg-white'
+                                        timeRemaining < 30 ? 'bg-set-red' : 
+                                        timeRemaining < 60 ? 'bg-gold' : 'bg-white'
                                     }`}>
                                         <div className="flex items-center justify-between mb-2">
                                             <span className={`text-sm uppercase tracking-wider font-semibold ${
-                                                (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 30 ? 'text-white' : 'text-black'
+                                                timeRemaining < 30 ? 'text-white' : 'text-black'
                                             }`}>
                                                 Time Remaining
                                             </span>
                                         </div>
                                         <div className={`text-2xl font-bold ${
-                                            (timeRemaining ?? roomSettings?.timerDuration ?? 0) < 30 ? 'text-white' : 'text-black'
+                                            timeRemaining < 30 ? 'text-white' : 'text-black'
                                         }`}>
-                                            {formatTime(timeRemaining ?? roomSettings?.timerDuration ?? 0)}
+                                            {formatTime(timeRemaining)}
                                         </div>
                                     </div>
                                 </div>
