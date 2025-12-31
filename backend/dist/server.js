@@ -40,30 +40,34 @@ if (!process.env.CORS_ORIGIN && process.env.NODE_ENV === 'production') {
 }
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
-const httpServer = (0, http_1.createServer)(app);
-(0, socket_1.initializeSocket)(httpServer);
+// Handle CORS before creating server (for proper middleware order)
 const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:5173');
 // Normalize CORS origins: trim whitespace and remove trailing slashes
 const corsOrigins = corsOrigin === '*'
     ? '*'
     : corsOrigin.split(',').map(origin => origin.trim().replace(/\/+$/, ''));
+const httpServer = (0, http_1.createServer)(app);
+(0, socket_1.initializeSocket)(httpServer);
+// CORS configuration - must be before routes
 if (corsOrigin === '*') {
     console.log('CORS Configuration: Allowing all origins (*)');
+    // When using credentials: true, we must return the actual origin, not '*'
     app.use((0, cors_1.default)({
         origin: (origin, callback) => {
-            // When credentials: true, we must return the actual origin string, not '*' or true
-            if (!origin) {
-                // Requests with no origin (like Postman, curl) - allow but no credentials
-                return callback(null, true);
+            // For requests with origin, return it (allows all origins with credentials)
+            // For requests without origin, allow them (like same-origin or curl)
+            if (origin) {
+                callback(null, origin);
             }
-            // Return the actual origin to allow it with credentials
-            callback(null, origin);
+            else {
+                callback(null, true);
+            }
         },
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        exposedHeaders: ['Content-Length', 'Content-Type'],
+        maxAge: 86400,
     }));
 }
 else {
@@ -97,8 +101,10 @@ else {
             callback(new Error(`CORS: Origin not allowed`));
         },
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        exposedHeaders: ['Content-Length', 'Content-Type'],
+        maxAge: 86400,
     }));
 }
 app.use(express_1.default.json());
