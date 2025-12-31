@@ -28,6 +28,11 @@ if (!process.env.JWT_SECRET) {
     console.warn("⚠️  WARNING: JWT_SECRET not set!");
     console.warn("   Authentication will not work. Generate one with: openssl rand -base64 32");
 }
+if (!process.env.CORS_ORIGIN && process.env.NODE_ENV === 'production') {
+    console.warn("⚠️  WARNING: CORS_ORIGIN not set in production!");
+    console.warn("   CORS errors will occur. Set CORS_ORIGIN to your frontend URL in Railway");
+    console.warn("   Example: CORS_ORIGIN=https://your-frontend.railway.app");
+}
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 const httpServer = (0, http_1.createServer)(app);
