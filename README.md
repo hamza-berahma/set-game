@@ -1,7 +1,10 @@
 # SET Game
 
 A multiplayer implementation of the SET card game with real-time gameplay.
-![Image of the demo](index.png)
+<video controls autoplay muted loop style="max-width:100%; height:auto;">
+  <source src="demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 ## Features
 
 - Real-time multiplayer gameplay via WebSockets
